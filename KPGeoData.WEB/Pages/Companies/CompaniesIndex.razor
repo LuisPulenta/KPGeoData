@@ -1,0 +1,109 @@
+﻿@page "/companies"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+
+<h3>Empresas</h3>
+
+<a class="btn btn-primary btn-sm mb-3" href="/companies/create">Nueva Empresa</a>
+
+<GenericList MyList="Companies">
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>Domicilio</th>
+                    <th>Teléfono</th>
+                    <th>CUIT</th>
+                    <th>EMail</th>
+                    <th>Contacto</th>
+                    <th>Activo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var company in Companies!)
+                {
+                    <tr>
+                        <td>
+                            @company.Name
+                        </td>
+                        <td>
+                            @company.Address
+                        </td>
+                        <td>
+                            @company.Phone
+                        </td>
+                        <td>
+                            @company.CUIT
+                        </td>
+                        <td>
+                            @company.EMail
+                        </td>
+                        <td>
+                            @company.Contact
+                        </td>
+                        <td>
+                            @company.Active
+                        </td>
+
+                        <td>
+                            <a href="/companies/edit/@company.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(company.Id))>Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+</GenericList>
+
+@code {
+    public List<Company>? Companies { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.Get<List<Company>>("/api/companies");
+        Companies = responseHttp.Response;
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var httpResponse = await repository.Delete($"/api/companies/{id}");
+
+        if (httpResponse.Error)
+        {
+            if (httpResponse.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var messageError = await httpResponse.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+                return;
+            }
+        }
+        await LoadAsync();
+    }
+}

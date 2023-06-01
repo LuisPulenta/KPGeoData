@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KPGeoData.Shared", "KPGeoData.Shared\KPGeoData.Shared.csproj", "{5089C4EB-A79E-4EB7-92B9-2524DAAECE41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KPGeoData.Shared", "KPGeoData.Shared\KPGeoData.Shared.csproj", "{5089C4EB-A79E-4EB7-92B9-2524DAAECE41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KPGeoData.API", "KPGeoData.API\KPGeoData.API.csproj", "{13BFEDF0-EF09-48C7-AE1A-720077A41AFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KPGeoData.API", "KPGeoData.API\KPGeoData.API.csproj", "{13BFEDF0-EF09-48C7-AE1A-720077A41AFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KPGeoData.WEB", "KPGeoData.WEB\KPGeoData.WEB.csproj", "{AF24C8FF-1945-4D3A-B4B7-0384BE6EA842}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KPGeoData.WEB", "KPGeoData.WEB\KPGeoData.WEB.csproj", "{AF24C8FF-1945-4D3A-B4B7-0384BE6EA842}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
