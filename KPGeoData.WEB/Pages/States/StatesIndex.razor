@@ -1,0 +1,89 @@
+﻿@page "/states"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+
+<h3>Estados</h3>
+
+<a class="btn btn-primary btn-sm mb-3" href="/states/create">Nuevo Estado</a>
+
+<GenericList MyList="States">
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Estado</th>
+                    <th>Activo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var state in States!)
+                {
+                    <tr>
+                        <td>
+                            @state.Name
+                        </td>
+                        <td>
+                            @state.Active
+                        </td>
+
+                        <td>
+                            <a href="/states/edit/@state.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(state.Id))>Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+</GenericList>
+
+@code {
+    public List<State>? States { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.Get<List<State>>("/api/states");
+        States = responseHttp.Response;
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var httpResponse = await repository.Delete($"/api/states/{id}");
+
+        if (httpResponse.Error)
+        {
+            if (httpResponse.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var messageError = await httpResponse.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+                return;
+            }
+        }
+        await LoadAsync();
+    }
+}

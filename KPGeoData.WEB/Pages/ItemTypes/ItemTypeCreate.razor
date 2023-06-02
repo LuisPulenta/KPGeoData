@@ -1,0 +1,32 @@
+﻿@page "/itemTypes/create"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Item</h3>
+
+<ItemTypeForm @ref="itemTypeForm" ItemType="itemType" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+
+@code {
+    private ItemType itemType = new();
+    private ItemTypeForm? itemTypeForm;
+
+    private async Task CreateAsync()
+    {
+        var httpResponse = await repository.Post("/api/itemtypes", itemType);
+        if (httpResponse.Error)
+        {
+            var messageError = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            return;
+        }
+        itemTypeForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/itemTypes");
+    }   
+
+    private void Return()
+    {
+        itemTypeForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/itemTypes");
+    }
+}

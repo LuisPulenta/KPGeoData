@@ -13,8 +13,14 @@ namespace KPGeoData.Shared.Entities
         
         [Display(Name = "Fecha")]
         public DateTime Date { get; set; }
+        public int CompanyId { get; set; }
         public Company? Company { get; set; }
         [Display(Name = "Activo")]
         public bool Active { get; set; }
+
+        public ICollection<Item>? Items { get; set; }
+
+        [Display(Name = "Items")]
+        public int ItemsNumber => Items == null ? 0 : Items.Count;
     }
 }

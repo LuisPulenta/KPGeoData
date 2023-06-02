@@ -1,0 +1,132 @@
+﻿@page "/surveys/details/{surveyId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+@if (survey is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h3>@survey.Name</h3>
+    <div class="mb-2">
+        <a class="btn btn-success btn-sm" href="/companies/details/@survey.CompanyId">Regresar</a>
+    </div>
+
+    <GenericList MyList="items">
+        <Body>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Dirección</th>
+                        <th>Latitud</th>
+                        <th>Longitud</th>
+                        <th>Localidad</th>
+                        <th>Activo</th>
+                        <th>Fotos</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in items!)
+                    {
+                        <tr>
+                            <td>
+                                @item.Name
+                            </td>
+                            <td>
+                                @item.Address
+                            </td>
+                            <td>
+                                @item.Latitude
+                            </td>
+                            <td>
+                                @item.Longitude
+                            </td>
+                            <td>
+                                @item.Locality
+                            </td>
+                            <td>
+                                @item.Active
+                            </td>
+                            <td>
+                                @item.ItemPhotosNumber
+                            </td>
+                            <td>
+                                <a class="btn btn-warning btn-sm" href="/items/edit/@item.Id">Editar</a>
+                                <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(item.Id))>Borrar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </Body>
+    </GenericList>
+}
+
+@code {
+    private Survey? survey;
+    private List<Item>? items;
+
+    [Parameter]
+    public int SurveyId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.Get<Survey>($"/api/surveys/full/{SurveyId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/companies");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        survey = responseHttp.Response;
+        items = survey!.Items!.ToList();
+    }
+
+    private async Task DeleteAsync(int itemId)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.Delete($"/api/items/full/{itemId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var message = await responseHttp.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+        }
+
+        await LoadAsync();
+    }
+}

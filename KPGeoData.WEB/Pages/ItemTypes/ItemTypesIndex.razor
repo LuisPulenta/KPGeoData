@@ -1,0 +1,89 @@
+﻿@page "/itemTypes"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+
+<h3>Items</h3>
+
+<a class="btn btn-primary btn-sm mb-3" href="/itemTypes/create">Nuevo Item</a>
+
+<GenericList MyList="ItemTypes">
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Activo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var itemType in ItemTypes!)
+                {
+                    <tr>
+                        <td>
+                            @itemType.Name
+                        </td>
+                        <td>
+                            @itemType.Active
+                        </td>
+
+                        <td>
+                            <a href="/itemTypes/edit/@itemType.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(itemType.Id))>Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+</GenericList>
+
+@code {
+    public List<ItemType>? ItemTypes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.Get<List<ItemType>>("/api/itemTypes");
+        ItemTypes = responseHttp.Response;
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var httpResponse = await repository.Delete($"/api/itemTypes/{id}");
+
+        if (httpResponse.Error)
+        {
+            if (httpResponse.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var messageError = await httpResponse.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+                return;
+            }
+        }
+        await LoadAsync();
+    }
+}

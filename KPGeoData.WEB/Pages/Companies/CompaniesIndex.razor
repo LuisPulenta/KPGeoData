@@ -20,6 +20,7 @@
                     <th>EMail</th>
                     <th>Contacto</th>
                     <th>Activo</th>
+                    <th>Relevam.</th>
                     <th></th>
                 </tr>
             </thead>
@@ -48,8 +49,16 @@
                         <td>
                             @company.Active
                         </td>
+                        @*<td>
+                            <input type="checkbox" checked= @company.Active">
+                        </td>*@
+                        <td>
+                            @company.SurveysNumber
+                        </td>
+
 
                         <td>
+                            <a href="/companies/details/@company.Id" class="btn btn-info btn-sm">Detalles</a>
                             <a href="/companies/edit/@company.Id" class="btn btn-warning btn-sm">Editar</a>
                             <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(company.Id))>Borrar</button>
                         </td>

@@ -1,0 +1,89 @@
+﻿@page "/eventTypes"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+
+<h3>Eventos</h3>
+
+<a class="btn btn-primary btn-sm mb-3" href="/eventTypes/create">Nuevo Evento</a>
+
+<GenericList MyList="EventTypes">
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Evento</th>
+                    <th>Activo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var eventType in EventTypes!)
+                {
+                    <tr>
+                        <td>
+                            @eventType.Name
+                        </td>
+                        <td>
+                            @eventType.Active
+                        </td>
+
+                        <td>
+                            <a href="/eventTypes/edit/@eventType.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(eventType.Id))>Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+</GenericList>
+
+@code {
+    public List<EventType>? EventTypes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.Get<List<EventType>>("/api/eventTypes");
+        EventTypes = responseHttp.Response;
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var httpResponse = await repository.Delete($"/api/eventTypes/{id}");
+
+        if (httpResponse.Error)
+        {
+            if (httpResponse.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var messageError = await httpResponse.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+                return;
+            }
+        }
+        await LoadAsync();
+    }
+}

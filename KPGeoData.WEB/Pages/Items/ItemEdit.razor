@@ -1,0 +1,62 @@
+﻿@page "/items/edit/{ItemId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<h3>Editar Item</h3>
+
+@if (item is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <ItemForm @ref="itemForm" Item="item" OnValidSubmit="EditAsync" ReturnAction="Return" />
+}
+
+@code {
+    private Item? item;
+    private ItemForm? itemForm;
+
+    [Parameter]
+    public int ItemId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHttp = await repository.Get<Item>($"/api/items/{ItemId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/countries");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        item = responseHttp.Response;
+    }
+
+    private async Task EditAsync()
+    {
+        var responseHttp = await repository.Put("/api/items", item);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        itemForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/surveys/details/{item!.SurveyId}");
+    }
+}

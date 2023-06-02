@@ -1,0 +1,32 @@
+﻿@page "/states/create"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Estado</h3>
+
+<StateForm @ref="stateForm" State="state" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+
+@code {
+    private State state = new();
+    private StateForm? stateForm;
+
+    private async Task CreateAsync()
+    {
+        var httpResponse = await repository.Post("/api/states", state);
+        if (httpResponse.Error)
+        {
+            var messageError = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            return;
+        }
+        stateForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/states");
+    }   
+
+    private void Return()
+    {
+        stateForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/states");
+    }
+}

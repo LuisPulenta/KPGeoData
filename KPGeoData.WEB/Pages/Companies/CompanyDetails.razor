@@ -1,0 +1,118 @@
+﻿@page "/companies/details/{Id:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+@if (company is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h3>@company.Name</h3>
+    <div class="mb-2">
+        <a class="btn btn-primary btn-sm" href="/surveys/create/@company.Id">Nuevo Relevamiento</a>
+        <a class="btn btn-success btn-sm" href="/companies">Regresar</a>
+    </div>
+
+    <GenericList MyList="surveys">
+        <Body>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Relevamiento</th>
+                        <th>Fecha</th>
+                        <th>Activo</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var survey in surveys!)
+                    {
+                        <tr>
+                            <td>
+                                @survey.Name
+                            </td>
+                            <td>
+                                @survey.Date
+                            </td>
+                            <td>
+                                @survey.Active
+                            </td>
+                            
+                            <td>
+                                <a class="btn btn-info btn-sm" href="/surveys/details/@survey.Id">Detalles</a>
+                                <a class="btn btn-warning btn-sm" href="/surveys/edit/@survey.Id">Editar</a>
+                                <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(survey.Id))>Borrar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </Body>
+    </GenericList>
+}
+
+@code {
+    private Company? company;
+    private List<Survey>? surveys;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.Get<Company>($"/api/companies/{Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/companies");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        company = responseHttp.Response;
+        surveys = company!.Surveys!.ToList();
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.Delete($"/api/surveys/{id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var message = await responseHttp.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+        }
+        await LoadAsync();
+    }
+}

@@ -1,0 +1,37 @@
+﻿@page "/surveys/create/{CompanyId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Departamento/Estado</h3>
+
+<SurveyForm @ref="surveyForm" Survey="survey" OnValidSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Survey survey = new();
+    private SurveyForm? surveyForm;
+
+    [Parameter]
+    public int CompanyId { get; set; }
+
+    private async Task Create()
+    {
+
+        survey.CompanyId = CompanyId;
+        var httpResponse = await repository.Post("/api/surveys", survey);
+        if (httpResponse.Error)
+        {
+            var message = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        surveyForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/companies/details/{CompanyId}");
+    }
+}
