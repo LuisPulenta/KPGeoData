@@ -49,6 +49,8 @@ namespace KPGeoData.API.Data
                                 new Item
                                 {
                                     Name="Item 1",
+                                    State="Roto",
+                                    ItemType="Luminaria",
                                     Address="Aca 123",
                                     Locality="Córdoba",
                                     Country="Argentina",
@@ -77,6 +79,8 @@ namespace KPGeoData.API.Data
                                  new Item
                                 {
                                     Name="Item 2",
+                                    State="Roto",
+                                    ItemType="Luminaria",
                                     Address="Allá 666",
                                     Locality="Córdoba",
                                     Country="Argentina",

@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using KPGeoData.API.Data;
 using KPGeoData.Shared.Entities;
+using KPGeoData.Shared.DTOs;
+using KPGeoData.API.Helpers;
 
 namespace KPGeoData.API.Controllers
 
@@ -18,13 +20,39 @@ namespace KPGeoData.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] PaginationDTO pagination)
         {
-            return Ok(await _context.Companies
+            var queryable = _context.Companies
                 .Include(x => x.Surveys)
                 .OrderBy(x => x.Name)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+
+            return Ok(await queryable
+                .OrderBy(x => x.Name)
+                .Paginate(pagination)
                 .ToListAsync());
         }
+
+        [HttpGet("totalPages")]
+        public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Companies.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
+            return Ok(totalPages);
+        }
+
 
         [HttpPost]
         public async Task<ActionResult> Post(Company company)

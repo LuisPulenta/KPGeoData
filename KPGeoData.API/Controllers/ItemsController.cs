@@ -1,41 +1,76 @@
 ﻿using KPGeoData.API.Data;
+using KPGeoData.API.Helpers;
+using KPGeoData.Shared.DTOs;
 using KPGeoData.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KPGeoData.API.Controllers
 {
-   
-        [ApiController]
-        [Route("/api/items")]
-        public class ItemsController : ControllerBase
+
+    [ApiController]
+    [Route("/api/items")]
+    public class ItemsController : ControllerBase
+    {
+        private readonly DataContext _context;
+
+        public ItemsController(DataContext context)
         {
-            private readonly DataContext _context;
+            _context = context;
+        }
 
-            public ItemsController(DataContext context)
+        [HttpGet]
+        public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Items
+                .Include(x => x.ItemPhotos)
+                .ThenInclude(x => x.EventType)
+                .Where(x => x.Survey!.Id == pagination.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {
-                _context = context;
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
             }
 
-            [HttpGet]
-            public async Task<ActionResult> Get()
+
+            return Ok(await queryable
+                .OrderBy(x => x.Name)
+                .Paginate(pagination)
+                .ToListAsync());
+        }
+
+        [HttpGet("totalPages")]
+        public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Items
+                .Where(x => x.Survey!.Id == pagination.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {
-                return Ok(await _context.Items
-                    .ToListAsync());
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
             }
 
-            [HttpGet("{id:int}")]
-            public async Task<ActionResult> Get(int id)
-            {
-                var item = await _context.Items
-                    .FirstOrDefaultAsync(x => x.Id == id);
-                if (item is null)
-                {
-                    return NotFound();
-                }
 
-                return Ok(item);
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
+            return Ok(totalPages);
+        }
+
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult> Get(int id)
+        {
+            var item = await _context.Items
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (item is null)
+            {
+                return NotFound();
             }
+
+            return Ok(item);
+        }
 
 
         [HttpGet("full/{id:int}")]
@@ -55,73 +90,73 @@ namespace KPGeoData.API.Controllers
 
 
         [HttpPost]
-            public async Task<ActionResult> Post(Item item)
+        public async Task<ActionResult> Post(Item item)
+        {
+            item.Date = DateTime.Now;
+            _context.Add(item);
+            try
             {
-                item.Date=DateTime.Now;
-                _context.Add(item);
-                try
+                await _context.SaveChangesAsync();
+                return Ok(item);
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
                 {
-                    await _context.SaveChangesAsync();
-                    return Ok(item);
+                    return BadRequest("Ya existe un Item con el mismo nombre.");
                 }
-                catch (DbUpdateException dbUpdateException)
+                else
                 {
-                    if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
-                    {
-                        return BadRequest("Ya existe un Item con el mismo nombre.");
-                    }
-                    else
-                    {
-                        return BadRequest(dbUpdateException.InnerException.Message);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    return BadRequest(exception.Message);
+                    return BadRequest(dbUpdateException.InnerException.Message);
                 }
             }
-
-            [HttpPut]
-            public async Task<ActionResult> Put(Item item)
+            catch (Exception exception)
             {
-                try
-                {
-                    _context.Update(item);
-                    await _context.SaveChangesAsync();
-                    return Ok(item);
-                }
-                catch (DbUpdateException dbUpdateException)
-                {
-                    if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
-                    {
-                        return BadRequest("Ya existe un Item con el mismo nombre.");
-                    }
-                    else
-                    {
-                        return BadRequest(dbUpdateException.InnerException.Message);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    return BadRequest(exception.Message);
-                }
-            }
-
-            [HttpDelete("{id:int}")]
-            public async Task<ActionResult> Delete(int id)
-            {
-                var afectedRows = await _context.Items
-                    .Where(x => x.Id == id)
-                    .ExecuteDeleteAsync();
-
-                if (afectedRows == 0)
-                {
-                    return NotFound();
-                }
-
-                return NoContent();
+                return BadRequest(exception.Message);
             }
         }
 
-   
+        [HttpPut]
+        public async Task<ActionResult> Put(Item item)
+        {
+            try
+            {
+                _context.Update(item);
+                await _context.SaveChangesAsync();
+                return Ok(item);
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
+                {
+                    return BadRequest("Ya existe un Item con el mismo nombre.");
+                }
+                else
+                {
+                    return BadRequest(dbUpdateException.InnerException.Message);
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var afectedRows = await _context.Items
+                .Where(x => x.Id == id)
+                .ExecuteDeleteAsync();
+
+            if (afectedRows == 0)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+    }
+
+
 }

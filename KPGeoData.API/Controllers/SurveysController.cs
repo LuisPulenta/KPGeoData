@@ -1,42 +1,77 @@
 ﻿using KPGeoData.API.Data;
+using KPGeoData.API.Helpers;
+using KPGeoData.Shared.DTOs;
 using KPGeoData.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KPGeoData.API.Controllers
 {
-   
-        [ApiController]
-        [Route("/api/surveys")]
-        public class SurveysController : ControllerBase
+
+    [ApiController]
+    [Route("/api/surveys")]
+    public class SurveysController : ControllerBase
+    {
+        private readonly DataContext _context;
+
+        public SurveysController(DataContext context)
         {
-            private readonly DataContext _context;
+            _context = context;
+        }
 
-            public SurveysController(DataContext context)
+        [HttpGet]
+        public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Surveys
+                .Include(x => x.Items)
+                .ThenInclude(x => x.ItemPhotos)
+                .ThenInclude(x => x.EventType)
+                .Where(x => x.Company!.Id == pagination.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {
-                _context = context;
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
             }
 
-            [HttpGet]
-            public async Task<ActionResult> Get()
+
+            return Ok(await queryable
+                .OrderBy(x => x.Name)
+                .Paginate(pagination)
+                .ToListAsync());
+        }
+
+        [HttpGet("totalPages")]
+        public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Surveys
+                .Where(x => x.Company!.Id == pagination.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {
-                return Ok(await _context.Surveys
-                    .ToListAsync());
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
             }
 
-            [HttpGet("{id:int}")]
-            public async Task<ActionResult> Get(int id)
-            {
-                var survey = await _context.Surveys
-                    .Include(x => x.Items)
-                    .FirstOrDefaultAsync(x => x.Id == id);
-                if (survey is null)
-                {
-                    return NotFound();
-                }
 
-                return Ok(survey);
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
+            return Ok(totalPages);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult> Get(int id)
+        {
+            var survey = await _context.Surveys
+                .Include(x => x.Items)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (survey is null)
+            {
+                return NotFound();
             }
+
+            return Ok(survey);
+        }
 
         [HttpGet("full/{id:int}")]
         public async Task<ActionResult> GetFull(int id)
@@ -56,73 +91,73 @@ namespace KPGeoData.API.Controllers
 
 
         [HttpPost]
-            public async Task<ActionResult> Post(Survey survey)
+        public async Task<ActionResult> Post(Survey survey)
+        {
+            survey.Date = DateTime.Now;
+            _context.Add(survey);
+            try
             {
-                survey.Date=DateTime.Now;
-                _context.Add(survey);
-                try
+                await _context.SaveChangesAsync();
+                return Ok(survey);
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
                 {
-                    await _context.SaveChangesAsync();
-                    return Ok(survey);
+                    return BadRequest("Ya existe un Relevamiento con el mismo nombre.");
                 }
-                catch (DbUpdateException dbUpdateException)
+                else
                 {
-                    if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
-                    {
-                        return BadRequest("Ya existe un Relevamiento con el mismo nombre.");
-                    }
-                    else
-                    {
-                        return BadRequest(dbUpdateException.InnerException.Message);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    return BadRequest(exception.Message);
+                    return BadRequest(dbUpdateException.InnerException.Message);
                 }
             }
-
-            [HttpPut]
-            public async Task<ActionResult> Put(Survey survey)
+            catch (Exception exception)
             {
-                try
-                {
-                    _context.Update(survey);
-                    await _context.SaveChangesAsync();
-                    return Ok(survey);
-                }
-                catch (DbUpdateException dbUpdateException)
-                {
-                    if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
-                    {
-                        return BadRequest("Ya existe un Relevamiento con el mismo nombre.");
-                    }
-                    else
-                    {
-                        return BadRequest(dbUpdateException.InnerException.Message);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    return BadRequest(exception.Message);
-                }
-            }
-
-            [HttpDelete("{id:int}")]
-            public async Task<ActionResult> Delete(int id)
-            {
-                var afectedRows = await _context.Surveys
-                    .Where(x => x.Id == id)
-                    .ExecuteDeleteAsync();
-
-                if (afectedRows == 0)
-                {
-                    return NotFound();
-                }
-
-                return NoContent();
+                return BadRequest(exception.Message);
             }
         }
 
-   
+        [HttpPut]
+        public async Task<ActionResult> Put(Survey survey)
+        {
+            try
+            {
+                _context.Update(survey);
+                await _context.SaveChangesAsync();
+                return Ok(survey);
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
+                {
+                    return BadRequest("Ya existe un Relevamiento con el mismo nombre.");
+                }
+                else
+                {
+                    return BadRequest(dbUpdateException.InnerException.Message);
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var afectedRows = await _context.Surveys
+                .Where(x => x.Id == id)
+                .ExecuteDeleteAsync();
+
+            if (afectedRows == 0)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+    }
+
+
 }

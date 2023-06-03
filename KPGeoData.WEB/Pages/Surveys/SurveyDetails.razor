@@ -10,6 +10,22 @@
 else
 {
     <h3>@survey.Name</h3>
+    <div class="mb-2" style="display: flex; flex-wrap:wrap; align-items: center;">
+        
+        <div class="mx-2">
+            <input style="width: 400px;" type="text" class="form-control" id="titulo" placeholder="Buscar Item..." @bind-value="Filter" />
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-primary" @onclick="ApplyFilterAsync">Filtrar</button>
+            <button type="button" class="btn btn-outline-danger" @onclick="CleanFilterAsync">Limpiar</button>
+        </div>
+    </div>
+
+
+    <Pagination CurrentPage="currentPage"
+            TotalPages="totalPages"
+            SelectedPage="SelectedPage" />
+
     <div class="mb-2">
         <a class="btn btn-success btn-sm" href="/companies/details/@survey.CompanyId">Regresar</a>
     </div>
@@ -19,14 +35,17 @@ else
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Item</th>
-                        <th>Dirección</th>
-                        <th>Latitud</th>
-                        <th>Longitud</th>
-                        <th>Localidad</th>
-                        <th>Activo</th>
-                        <th>Fotos</th>
-                        <th></th>
+                        <th style="width:220px">Item</th>
+                    <th style="width:220px">Tipo</th>
+                        <th style="width:220px">Dirección</th>
+                    <th style="width:220px">Localidad</th>
+                        <th style="width:220px">País</th>
+                    <th style="width:220px">Latitud</th>
+                        <th style="width:220px">Longitud</th>
+                    <th style="width:220px">Estado</th>
+                        <th style="width:220px">Activo</th>
+                    <th style="width:220px">Fotos</th>
+                        <th style="width:220px"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,7 +56,16 @@ else
                                 @item.Name
                             </td>
                             <td>
+                                @item.ItemType
+                            </td>
+                            <td>
                                 @item.Address
+                            </td>
+                            <td>
+                                @item.Locality
+                            </td>
+                            <td>
+                                @item.Country
                             </td>
                             <td>
                                 @item.Latitude
@@ -46,7 +74,7 @@ else
                                 @item.Longitude
                             </td>
                             <td>
-                                @item.Locality
+                                @item.State
                             </td>
                             <td>
                                 @item.Active
@@ -54,7 +82,7 @@ else
                             <td>
                                 @item.ItemPhotosNumber
                             </td>
-                            <td>
+                            <td style="width:260px">
                                 <a class="btn btn-warning btn-sm" href="/items/edit/@item.Id">Editar</a>
                                 <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(item.Id))>Borrar</button>
                             </td>
@@ -69,6 +97,18 @@ else
 @code {
     private Survey? survey;
     private List<Item>? items;
+    private int currentPage = 1;
+    private int totalPages;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Page { get; set; } = "";
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Filter { get; set; } = "";
+
+
 
     [Parameter]
     public int SurveyId { get; set; }
@@ -78,24 +118,42 @@ else
         await LoadAsync();
     }
 
-    private async Task LoadAsync()
+    private async Task SelectedPage(int page)
     {
-        var responseHttp = await repository.Get<Survey>($"/api/surveys/full/{SurveyId}");
-        if (responseHttp.Error)
-        {
-            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
-            {
-                navigationManager.NavigateTo("/companies");
-                return;
-            }
+        currentPage = page;
+        await LoadAsync(page);
+    }
 
-            var message = await responseHttp.GetErrorMessage();
-            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
-            return;
+
+    private async Task LoadAsync(int page = 1)
+    {
+        if (!string.IsNullOrWhiteSpace(Page))
+        {
+            page = Convert.ToInt32(Page);
         }
 
-        survey = responseHttp.Response;
-        items = survey!.Items!.ToList();
+        string url1 = string.Empty;
+        string url2 = string.Empty;
+
+        if (string.IsNullOrEmpty(Filter))
+        {
+            url1 = $"/api/items?id={SurveyId}&page={SurveyId}";
+            url2 = $"/api/items/totalPages?id={SurveyId}";
+        }
+        else
+        {
+            url1 = $"/api/items?id={SurveyId}&page={page}&filter={Filter}";
+            url2 = $"/api/items/totalPages?id={SurveyId}&filter={Filter}";
+        }
+
+
+        var responseHppt = await repository.Get<Survey>($"/api/surveys/{SurveyId}");
+        var responseHppt2 = await repository.Get<List<Item>>(url1);
+        var responseHppt3 = await repository.Get<int>(url2);
+        survey = responseHppt.Response;
+        items = responseHppt2.Response;
+        totalPages = responseHppt3.Response;
+        var a = 1;
     }
 
     private async Task DeleteAsync(int itemId)
@@ -129,4 +187,18 @@ else
 
         await LoadAsync();
     }
+
+    private async Task CleanFilterAsync()
+    {
+        Filter = string.Empty;
+        await ApplyFilterAsync();
+    }
+
+    private async Task ApplyFilterAsync()
+    {
+        int page = 1;
+        await LoadAsync(page);
+        await SelectedPage(page);
+    }
+
 }

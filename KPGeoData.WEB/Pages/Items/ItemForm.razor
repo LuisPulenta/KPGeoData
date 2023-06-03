@@ -14,12 +14,35 @@
         </div>
     </div>
 
+    <div class="mb-3">
+        <label>Tipo:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Item.ItemType" />
+            <ValidationMessage For="@(() => Item.ItemType)" />
+        </div>
+    </div>
 
     <div class="mb-3">
         <label>Dirección:</label>
         <div>
             <InputText class="form-control" @bind-Value="@Item.Address" />
             <ValidationMessage For="@(() => Item.Address)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Localidad:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Item.Locality" />
+            <ValidationMessage For="@(() => Item.Locality)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>País:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Item.Country" />
+            <ValidationMessage For="@(() => Item.Country)" />
         </div>
     </div>
 @*
@@ -40,10 +63,10 @@
     </div>*@
 
       <div class="mb-3">
-        <label>Localidad:</label>
+        <label>Estado:</label>
         <div>
-            <InputText class="form-control" @bind-Value="@Item.Locality" />
-            <ValidationMessage For="@(() => Item.Locality)" />
+            <InputText class="form-control" @bind-Value="@Item.State" />
+            <ValidationMessage For="@(() => Item.State)" />
         </div>
     </div>
 

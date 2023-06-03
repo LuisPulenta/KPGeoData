@@ -10,8 +10,27 @@
 else
 {
     <h3>@company.Name</h3>
+
+<div class="mb-2" style="display: flex; flex-wrap:wrap; align-items: center;">
+        <div>
+            <a class="btn btn-primary btn-sm" href="/surveys/create/@company.Id">Nuevo Relevamiento</a>
+        </div>
+        <div class="mx-2">
+            <input style="width: 400px;" type="text" class="form-control" id="titulo" placeholder="Buscar Relevamiento..." @bind-value="Filter" />
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-primary" @onclick="ApplyFilterAsync">Filtrar</button>
+            <button type="button" class="btn btn-outline-danger" @onclick="CleanFilterAsync">Limpiar</button>
+        </div>
+    </div>
+
+
+    <Pagination CurrentPage="currentPage"
+            TotalPages="totalPages"
+            SelectedPage="SelectedPage" />
+
     <div class="mb-2">
-        <a class="btn btn-primary btn-sm" href="/surveys/create/@company.Id">Nuevo Relevamiento</a>
+        
         <a class="btn btn-success btn-sm" href="/companies">Regresar</a>
     </div>
 
@@ -20,10 +39,10 @@ else
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Relevamiento</th>
-                        <th>Fecha</th>
-                        <th>Activo</th>
-                        <th></th>
+                        <th style="width:220px">Relevamiento</th>
+                        <th style="width:220px">Fecha</th>
+                        <th style="width:220px">Activo</th>
+                        <th style="width:220px"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,8 +58,8 @@ else
                             <td>
                                 @survey.Active
                             </td>
-                            
-                            <td>
+
+                            <td style="width:260px">
                                 <a class="btn btn-info btn-sm" href="/surveys/details/@survey.Id">Detalles</a>
                                 <a class="btn btn-warning btn-sm" href="/surveys/edit/@survey.Id">Editar</a>
                                 <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(survey.Id))>Borrar</button>
@@ -56,6 +75,17 @@ else
 @code {
     private Company? company;
     private List<Survey>? surveys;
+    private int currentPage = 1;
+    private int totalPages;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Page { get; set; } = "";
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Filter { get; set; } = "";
+
 
     [Parameter]
     public int Id { get; set; }
@@ -65,24 +95,43 @@ else
         await LoadAsync();
     }
 
-    private async Task LoadAsync()
+    private async Task SelectedPage(int page)
     {
-        var responseHttp = await repository.Get<Company>($"/api/companies/{Id}");
-        if (responseHttp.Error)
-        {
-            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
-            {
-                navigationManager.NavigateTo("/companies");
-                return;
-            }
+        currentPage = page;
+        await LoadAsync(page);
+    }
 
-            var message = await responseHttp.GetErrorMessage();
-            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
-            return;
+
+    private async Task LoadAsync(int page = 1)
+    {
+        if (!string.IsNullOrWhiteSpace(Page))
+        {
+            page = Convert.ToInt32(Page);
         }
 
-        company = responseHttp.Response;
-        surveys = company!.Surveys!.ToList();
+        string url1 = string.Empty;
+        string url2 = string.Empty;
+
+
+
+        if (string.IsNullOrEmpty(Filter))
+        {
+            url1 = $"/api/surveys?id={Id}&page={page}";
+            url2 = $"/api/surveys/totalPages?id={Id}";
+        }
+        else
+        {
+            url1 = $"/api/surveys?id={Id}&page={page}&filter={Filter}";
+            url2 = $"/api/surveys/totalPages?id={Id}&filter={Filter}";
+        }
+
+
+        var responseHppt = await repository.Get<Company>($"/api/companies/{Id}");
+        var responseHppt2 = await repository.Get<List<Survey>>(url1);
+        var responseHppt3 = await repository.Get<int>(url2);
+        company = responseHppt.Response;
+        surveys = responseHppt2.Response;
+        totalPages = responseHppt3.Response;
     }
 
     private async Task DeleteAsync(int id)
@@ -115,4 +164,17 @@ else
         }
         await LoadAsync();
     }
+    private async Task CleanFilterAsync()
+    {
+        Filter = string.Empty;
+        await ApplyFilterAsync();
+    }
+
+    private async Task ApplyFilterAsync()
+    {
+        int page = 1;
+        await LoadAsync(page);
+        await SelectedPage(page);
+    }
+
 }
