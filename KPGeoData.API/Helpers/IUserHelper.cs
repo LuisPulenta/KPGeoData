@@ -1,4 +1,5 @@
-﻿using KPGeoData.Shared.Entities;
+﻿using KPGeoData.Shared.DTOs;
+using KPGeoData.Shared.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace KPGeoData.API.Helpers
@@ -12,7 +13,12 @@ namespace KPGeoData.API.Helpers
         Task CheckRoleAsync(string roleName);
 
         Task AddUserToRoleAsync(User user, string roleName);
-
+        
         Task<bool> IsUserInRoleAsync(User user, string roleName);
+        
+        Task<SignInResult> LoginAsync(LoginDTO model);
+        
+        Task LogoutAsync();
+
     }
 }

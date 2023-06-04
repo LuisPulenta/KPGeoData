@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using KPGeoData.API.Data;
 using KPGeoData.Shared.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KPGeoData.API.Controllers
-
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/itemTypes")]
     public class ItemTypesController : ControllerBase
     {

@@ -2,13 +2,15 @@
 using KPGeoData.API.Helpers;
 using KPGeoData.Shared.DTOs;
 using KPGeoData.Shared.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KPGeoData.API.Controllers
 {
-
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/surveys")]
     public class SurveysController : ControllerBase
     {

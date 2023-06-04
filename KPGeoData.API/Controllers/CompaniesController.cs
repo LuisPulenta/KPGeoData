@@ -4,11 +4,13 @@ using KPGeoData.API.Data;
 using KPGeoData.Shared.Entities;
 using KPGeoData.Shared.DTOs;
 using KPGeoData.API.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KPGeoData.API.Controllers
-
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/companies")]
     public class CompaniesController : ControllerBase
     {
