@@ -8,7 +8,7 @@ namespace KPGeoData.Shared.Entities
 
 
         [Display(Name = "Empresa")]
-        [MaxLength(100, ErrorMessage = "El campo {0} no puede tener mas de {1} caracteres.")]
+        [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Name { get; set; } = null!;
 
@@ -40,11 +40,15 @@ namespace KPGeoData.Shared.Entities
         [Display(Name = "Activo")]
         public bool Active { get; set; }
 
+        [Display(Name = "Logo")]
+        public string? Photo { get; set; }
+
+
         public ICollection<Survey>? Surveys { get; set; }
 
         [Display(Name = "Relevamientos")]
         public int SurveysNumber => Surveys == null ? 0 : Surveys.Count;
 
-        //public ICollection<User> Users { get; set; }
+        public ICollection<User> Users { get; set; } = null!;
     }
 }

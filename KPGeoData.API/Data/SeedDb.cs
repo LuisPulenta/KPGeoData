@@ -1,4 +1,6 @@
-﻿using KPGeoData.Shared.Entities;
+﻿using KPGeoData.API.Helpers;
+using KPGeoData.Shared.Entities;
+using KPGeoData.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using static System.Net.WebRequestMethods;
 
@@ -7,10 +9,12 @@ namespace KPGeoData.API.Data
     public class SeedDb
     {
         private readonly DataContext _context;
+        private readonly IUserHelper _userHelper;
 
-        public SeedDb(DataContext context)
+        public SeedDb(DataContext context, IUserHelper userHelper)
         {
             _context = context;
+            _userHelper = userHelper;
         }
 
         public async Task SeedAsync()
@@ -20,8 +24,44 @@ namespace KPGeoData.API.Data
             await CheckCompaniesAsync();
             await CheckItemTypesAsync();
             await CheckStatesAsync();
-            
+            await CheckRolesAsync();
+            await CheckUserAsync("1010", "Luis", "Núñez", "luis@yopmail.com", "351 681 4963", UserType.Admin);
+            await CheckUserAsync("2020", "Pablo", "Lacuadri", "pablo@yopmail.com", "351 300 2255", UserType.Admin);
+            await CheckUserAsync("3030", "Andrés", "Oberti", "andres@yopmail.com", "351 000 0000", UserType.UserWeb);
         }
+
+        private async Task<User> CheckUserAsync(string document, string firstName, string lastName, string email, string phone, UserType userType)
+        {
+            var user = await _userHelper.GetUserAsync(email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    UserName = email,
+                    PhoneNumber = phone,
+                    Document = document,
+                    Company = _context.Companies.FirstOrDefault(),
+                    UserType = userType,
+                };
+
+                await _userHelper.AddUserAsync(user, "123456");
+                await _userHelper.AddUserToRoleAsync(user, userType.ToString());
+            }
+
+            return user;
+        }
+
+        private async Task CheckRolesAsync()
+        {
+            await _userHelper.CheckRoleAsync(UserType.Admin.ToString());
+            await _userHelper.CheckRoleAsync(UserType.UserWeb.ToString());
+            await _userHelper.CheckRoleAsync(UserType.UserApp.ToString());
+        }
+
+
 
         private async Task CheckCompaniesAsync()
         {

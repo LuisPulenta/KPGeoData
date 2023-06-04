@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using KPGeoData.Shared.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace KPGeoData.API.Data
 {
-    public class DataContext : DbContext
+        public class DataContext : IdentityDbContext<User>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
