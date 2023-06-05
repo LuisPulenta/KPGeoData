@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.Design;
 
 namespace KPGeoData.API.Controllers
 {
@@ -159,6 +160,16 @@ namespace KPGeoData.API.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("combo/{companyId:int}")]
+        public async Task<ActionResult> GetCombo(int companyId)
+        {
+            return Ok(await _context.Surveys
+                .Where(x => x.CompanyId == companyId && x.Active)
+                 .OrderBy(c => c.Name)
+                 .ToListAsync());
+        }
+
     }
 
 

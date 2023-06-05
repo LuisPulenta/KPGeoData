@@ -4,78 +4,116 @@
 @inject NavigationManager navigationManager
 @inject ILoginService loginService
 
-<h3>Registrar Nuevo Usuario App</h3>
 
 <EditForm Model="userDTO" OnValidSubmit="CreateUserAsync">
     <DataAnnotationsValidator />
 
-    <div class="row">
-        <div class="col-6">
-            <div class="mb-3">
-                <label>Nombre:</label>
-                <div>
-                    <InputText class="form-control" @bind-Value="@userDTO.FirstName" />
-                    <ValidationMessage For="@(() => userDTO.FirstName)" />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label>Apellido:</label>
-                <div>
-                    <InputText class="form-control" @bind-Value="@userDTO.LastName" />
-                    <ValidationMessage For="@(() => userDTO.LastName)" />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label>Documento:</label>
-                <div>
-                    <InputText class="form-control" @bind-Value="@userDTO.Document" />
-                    <ValidationMessage For="@(() => userDTO.Document)" />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label>Teléfono:</label>
-                <div>
-                    <InputText class="form-control" @bind-Value="@userDTO.PhoneNumber" />
-                    <ValidationMessage For="@(() => userDTO.PhoneNumber)" />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label>Email:</label>
-                <div>
-                    <InputText class="form-control" @bind-Value="@userDTO.Email" />
-                    <ValidationMessage For="@(() => userDTO.Email)" />
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> Registrar Nuevo  Usuario App
+                <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Registrar</button>
+            </span>
         </div>
-        <div class="col-6">
-            <div class="mb-3">
-                <label>Empresa:</label>
-                <div>
-                    <InputNumber class="form-control" @bind-Value="@userDTO.CompanyId" />
-                    <ValidationMessage For="@(() => userDTO.CompanyId)" />
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>Nombre:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.FirstName" />
+                            <ValidationMessage For="@(() => userDTO.FirstName)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Apellido:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.LastName" />
+                            <ValidationMessage For="@(() => userDTO.LastName)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Documento:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.Document" />
+                            <ValidationMessage For="@(() => userDTO.Document)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Teléfono:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.PhoneNumber" />
+                            <ValidationMessage For="@(() => userDTO.PhoneNumber)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Email:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.Email" />
+                            <ValidationMessage For="@(() => userDTO.Email)" />
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label>Contraseña:</label>
-                <div>
-                    <InputText type="password" class="form-control" @bind-Value="@userDTO.Password" />
-                    <ValidationMessage For="@(() => userDTO.Password)" />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label>Confirmación de contraseña:</label>
-                <div>
-                    <InputText type="password" class="form-control" @bind-Value="@userDTO.PasswordConfirm" />
-                    <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>Empresa:</label>
+                        <div>
+                            <select class="form-select" @bind="userDTO.CompanyId">
+                                <option value="0">-- Seleccione una Empresa --</option>
+                                @if (companies is not null)
+                                {
+                                    @foreach (var company in companies)
+                                    {
+                                        <option value="@company.Id">@company.Name</option>
+                                    }
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => userDTO.CompanyId)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Contraseña:</label>
+                        <div>
+                            <InputText type="password" class="form-control" @bind-Value="@userDTO.Password" />
+                            <ValidationMessage For="@(() => userDTO.Password)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Confirmación de contraseña:</label>
+                        <div>
+                            <InputText type="password" class="form-control" @bind-Value="@userDTO.PasswordConfirm" />
+                            <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <button class="btn btn-primary btn-sm" type="submit">Registrar</button>
 </EditForm>
 
 @code {
     private UserDTO userDTO = new();
+    private List<Company>? companies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompaniesAsync();
+    }
+
+
+    private async Task LoadCompaniesAsync()
+    {
+        var responseHttp = await repository.Get<List<Company>>("/api/companies/combo");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        companies = responseHttp.Response;
+    }
 
     private async Task CreateUserAsync()
     {
@@ -90,7 +128,7 @@
             return;
         }
 
-        await loginService.LoginAsync(responseHttp.Response!.Token);
+        //await loginService.LoginAsync(responseHttp.Response!.Token);
         navigationManager.NavigateTo("/");
     }
 }

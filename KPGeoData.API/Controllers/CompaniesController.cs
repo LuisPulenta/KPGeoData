@@ -26,6 +26,7 @@ namespace KPGeoData.API.Controllers
         {
             var queryable = _context.Companies
                 .Include(x => x.Surveys)
+                .Where(x => x.Id != 1)
                 .OrderBy(x => x.Name)
                 .AsQueryable();
 
@@ -137,6 +138,16 @@ namespace KPGeoData.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpGet("combo")]
+        public async Task<ActionResult> GetCombo()
+        {
+            return Ok(await _context.Companies
+                  .OrderBy(c => c.Name)
+                  .Where(c => c.Active && c.Id!=1)
+                  .ToListAsync());
+        }
+
 
     }
 }
