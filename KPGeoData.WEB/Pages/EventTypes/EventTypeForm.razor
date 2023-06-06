@@ -4,24 +4,34 @@
 
 <EditForm EditContext="editContext" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
+    <div class="card">
 
-    <div class="mb-3">
-        <label>Evento:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@EventType.Name" />
-            <ValidationMessage For="@(() => EventType.Name)" />
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> @Titulo
+                <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Guardar Cambios</button>
+                <button class="btn btn-success btn-sm float-end mx-2" @onclick="ReturnAction"><i class="oi oi-arrow-thick-left"></i> Regresar</button>
+            </span>
+        </div>
+
+        <div class="card-body">
+            <div class="mb-3">
+                <label>Evento:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@EventType.Name" />
+                    <ValidationMessage For="@(() => EventType.Name)" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Activo:</label>
+                <div>
+                    <input type="checkbox" @bind="@EventType.Active">
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label>Activo:</label>
-        <div>
-            <input type="checkbox" @bind="@EventType.Active">
-        </div>
-    </div>
-
-    <button class="btn btn-primary btn-sm" type="submit">Guardar Cambios</button>
-    <button class="btn btn-success btn-sm" @onclick="ReturnAction">Regresar</button>
 </EditForm>
 
 @code {
@@ -31,6 +41,9 @@
     {
         editContext = new(EventType);
     }
+
+    [Parameter]
+    public string Titulo { get; set; } = null!;
 
     [EditorRequired]
     [Parameter]

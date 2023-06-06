@@ -4,15 +4,13 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Editar Estado</h3>
-
 @if (state is null)
 {
      <div class="spinner"/>
 }
 else
 {
-    <StateForm @ref="stateForm" State="state" OnValidSubmit="EditAsync" ReturnAction="Return" />
+    <StateForm @ref="stateForm" State="state" OnValidSubmit="EditAsync" ReturnAction="Return"  Titulo=" Editar Estado" />
 }
 
 @code {

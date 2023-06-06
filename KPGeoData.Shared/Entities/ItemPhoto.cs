@@ -7,7 +7,7 @@ namespace KPGeoData.Shared.Entities
         public int Id { get; set; }
 
         public int ItemId { get; set; }
-        public Item Item { get; set; } = null!;
+        public Item? Item { get; set; } = null!;
         public int EventTypeId { get; set; }
         public EventType? EventType { get; set; } = null!;
 

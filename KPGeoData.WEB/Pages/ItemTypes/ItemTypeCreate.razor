@@ -4,9 +4,8 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Crear Item</h3>
 
-<ItemTypeForm @ref="itemTypeForm" ItemType="itemType" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+<ItemTypeForm @ref="itemTypeForm" ItemType="itemType" OnValidSubmit="CreateAsync" ReturnAction="Return" Titulo=" Crear Item" />
 
 @code {
     private ItemType itemType = new();

@@ -4,7 +4,6 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Editar Evento</h3>
 
 @if (eventType is null)
 {
@@ -12,7 +11,7 @@
 }
 else
 {
-    <EventTypeForm @ref="eventTypeForm" EventType="eventType" OnValidSubmit="EditAsync" ReturnAction="Return" />
+    <EventTypeForm @ref="eventTypeForm" EventType="eventType" OnValidSubmit="EditAsync" ReturnAction="Return" Titulo=" Editar Evento" />
 }
 
 @code {

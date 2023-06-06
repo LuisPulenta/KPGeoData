@@ -21,11 +21,6 @@ namespace KPGeoData.API.Controllers
             _context = context;
         }
 
-        public DataContext Get_context()
-        {
-            return _context;
-        }
-
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination, DataContext _context)
         {
@@ -64,7 +59,6 @@ namespace KPGeoData.API.Controllers
             double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
             return Ok(totalPages);
         }
-
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult> Get(int id)
@@ -163,6 +157,8 @@ namespace KPGeoData.API.Controllers
 
             return NoContent();
         }
+
+
     }
 
 

@@ -4,9 +4,7 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Crear Evento</h3>
-
-<EventTypeForm @ref="eventTypeForm" EventType="eventType" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+<EventTypeForm @ref="eventTypeForm" EventType="eventType" OnValidSubmit="CreateAsync" ReturnAction="Return" Titulo=" Crear Evento" />
 
 @code {
     private EventType eventType = new();
