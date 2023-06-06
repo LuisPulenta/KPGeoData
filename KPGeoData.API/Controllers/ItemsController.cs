@@ -21,11 +21,16 @@ namespace KPGeoData.API.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination)
+        public DataContext Get_context()
         {
-            var queryable = _context.Items
-                .Include(x => x.ItemPhotos)
+            return _context;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination, DataContext _context)
+        {
+            var queryable = _context.Items!
+                .Include(x => x.ItemPhotos!)
                 .ThenInclude(x => x.EventType)
                 .Where(x => x.Survey!.Id == pagination.Id)
                 .AsQueryable();

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design;
 
 namespace KPGeoData.API.Controllers
 {
@@ -25,9 +24,9 @@ namespace KPGeoData.API.Controllers
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination)
         {
-            var queryable = _context.Surveys
-                .Include(x => x.Items)
-                .ThenInclude(x => x.ItemPhotos)
+            var queryable = _context.Surveys!
+                .Include(x => x.Items!)
+                .ThenInclude(x => x.ItemPhotos!)
                 .ThenInclude(x => x.EventType)
                 .Where(x => x.Company!.Id == pagination.Id)
                 .AsQueryable();
@@ -79,8 +78,8 @@ namespace KPGeoData.API.Controllers
         [HttpGet("full/{id:int}")]
         public async Task<ActionResult> GetFull(int id)
         {
-            var survey = await _context.Surveys
-                .Include(x => x.Items)
+            var survey = await _context.Surveys!
+                .Include(x => x.Items!)
                 .ThenInclude(x => x.ItemPhotos)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (survey is null)

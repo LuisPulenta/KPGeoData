@@ -12,5 +12,6 @@ namespace KPGeoData.Shared.Entities
         public string Name { get; set; } = null!;
         [Display(Name = "Activo")]
         public bool Active { get; set; }
+        public ICollection<ItemPhoto>? ItemPhotos { get; set; } = null!;
     }
 }

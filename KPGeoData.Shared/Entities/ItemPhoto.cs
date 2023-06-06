@@ -5,8 +5,11 @@ namespace KPGeoData.Shared.Entities
     public class ItemPhoto
     {
         public int Id { get; set; }
+
+        public int ItemId { get; set; }
         public Item Item { get; set; } = null!;
-        public EventType EventType { get; set; } = null!;
+        public int EventTypeId { get; set; }
+        public EventType? EventType { get; set; } = null!;
 
         [Display(Name = "Fecha")]
         public DateTime Date { get; set; }
@@ -17,6 +20,6 @@ namespace KPGeoData.Shared.Entities
         public string Photo { get; set; } = null!;
         public string PhotoFullPath => string.IsNullOrEmpty(Photo)
         ? $"http://190.111.249.225/RowingAppApi/images/Obras/noimage.png"
-        : $"http://190.111.249.225/RowingAppApi{Photo.Substring(1)}";
+        : $"http://190.111.249.225/RowingAppApi{Photo[1..]}";
     }
 }

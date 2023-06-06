@@ -5,7 +5,6 @@ namespace KPGeoData.Shared.Entities
     public   class Item
     {
         public int Id { get; set; }
-
         public Survey? Survey { get; set; }
         public string State { get; set; } = null!;
         public string ItemType { get; set; } = null!;

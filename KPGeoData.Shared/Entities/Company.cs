@@ -49,6 +49,6 @@ namespace KPGeoData.Shared.Entities
         [Display(Name = "Relevamientos")]
         public int SurveysNumber => Surveys == null ? 0 : Surveys.Count;
 
-        public ICollection<User> Users { get; set; } = null!;
+        public ICollection<User>? Users { get; set; } = null!;
     }
 }

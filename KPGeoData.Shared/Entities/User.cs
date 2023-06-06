@@ -1,7 +1,6 @@
 ﻿using KPGeoData.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using KPGeoData.Shared.Entities;
-using KPGeoData.Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace KPGeoData.Shared.Entities
