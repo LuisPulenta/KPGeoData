@@ -4,83 +4,94 @@
 
 <EditForm EditContext="editContext" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
+    <div class="card">
 
-
-    <div class="mb-3">
-        <label>Item:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Item.Name" />
-            <ValidationMessage For="@(() => Item.Name)" />
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> @Titulo
+                <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Guardar Cambios</button>
+                <button class="btn btn-success btn-sm float-end mx-2" @onclick="ReturnAction"><i class="oi oi-arrow-thick-left"></i> Regresar</button>
+            </span>
         </div>
-    </div>
 
-    <div class="mb-3">
-        <label>Tipo:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Item.ItemType" />
-            <ValidationMessage For="@(() => Item.ItemType)" />
-        </div>
-    </div>
+        <div class="card-body">
 
-    <div class="mb-3">
-        <label>Dirección:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Item.Address" />
-            <ValidationMessage For="@(() => Item.Address)" />
-        </div>
-    </div>
+            <div class="mb-3">
+                <label>Item:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Name" />
+                    <ValidationMessage For="@(() => Item.Name)" />
+                </div>
+            </div>
 
-    <div class="mb-3">
-        <label>Localidad:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Item.Locality" />
-            <ValidationMessage For="@(() => Item.Locality)" />
-        </div>
-    </div>
+            <div class="mb-3">
+                <label>Tipo:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.ItemType" />
+                    <ValidationMessage For="@(() => Item.ItemType)" />
+                </div>
+            </div>
 
-    <div class="mb-3">
-        <label>País:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Item.Country" />
-            <ValidationMessage For="@(() => Item.Country)" />
-        </div>
-    </div>
-@*
-    <div class="mb-3">
-        <label>Latitud:</label>
-        <div>
+            <div class="mb-3">
+                <label>Dirección:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Address" />
+                    <ValidationMessage For="@(() => Item.Address)" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Localidad:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Locality" />
+                    <ValidationMessage For="@(() => Item.Locality)" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>País:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Country" />
+                    <ValidationMessage For="@(() => Item.Country)" />
+                </div>
+            </div>
+            @*
+            <div class="mb-3">
+            <label>Latitud:</label>
+            <div>
             <InputText class="form-control" @bind-Value="@Item.Latitude.ToString()" />
             <ValidationMessage For="@(() => Item.Latitude.ToString())" />
-        </div>
-    </div>
+            </div>
+            </div>
 
-    <div class="mb-3">
-        <label>Longitud:</label>
-        <div>
+            <div class="mb-3">
+            <label>Longitud:</label>
+            <div>
             <InputText class="form-control" @bind-Value="@Item.Longitude.ToString()" />
             <ValidationMessage For="@(() => Item.Longitude.ToString())" />
-        </div>
-    </div>*@
+            </div>
+            </div>*@
 
-      <div class="mb-3">
-        <label>Estado:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Item.State" />
-            <ValidationMessage For="@(() => Item.State)" />
+            <div class="mb-3">
+                <label>Estado:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.State" />
+                    <ValidationMessage For="@(() => Item.State)" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Activo:</label>
+                <div>
+                    <input type="checkbox" @bind="@Item.Active">
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label>Activo:</label>
-        <div>
-            <input type="checkbox" @bind="@Item.Active">
-        </div>
-    </div>
-   
 
 
-    <button class="btn btn-primary" type="submit">Guardar Cambios</button>
-    <button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
 </EditForm>
 
 @code {
@@ -104,7 +115,8 @@
     {
         editContext = new(Item);
     }
-
+    [Parameter]
+    public string Titulo { get; set; } = null!;
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {
         var formWasMofied = editContext.IsModified();

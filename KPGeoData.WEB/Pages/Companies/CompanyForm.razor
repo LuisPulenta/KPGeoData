@@ -76,9 +76,6 @@
                     <div class="mb-3" >
                         <InputImg Label="Logo" ImageSelected="ImageSelected" ImageURL="@imageUrl" />
                     </div>
-
-
-                    
                 </div>
             </div>
         </div>
@@ -94,7 +91,7 @@
         editContext = new(Company);
         if (!string.IsNullOrEmpty(Company.Photo))
         {
-            imageUrl = Company.Photo;
+            imageUrl = Company.PhotoFullPath;
             Company.Photo = null;
         }
     }

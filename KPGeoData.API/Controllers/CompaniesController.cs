@@ -133,23 +133,38 @@ namespace KPGeoData.API.Controllers
                 return BadRequest(ModelState);
             }
 
+            Company oldCompany = await _context.Companies.FirstOrDefaultAsync(o=>o.Id == company.Id);
+                        
             //Foto
-            var imageUrl = string.Empty;
-            byte[] imageArray = Convert.FromBase64String(company.Photo);
-            var stream = new MemoryStream(imageArray);
-            var guid = Guid.NewGuid().ToString();
-            var file = $"{guid}.jpg";
-            var folder = "wwwroot\\images\\Logos";
-            var fullPath = $"~/images/Logos/{file}";
-            var response = _filesHelper.UploadPhoto(stream, folder, file);
-
-            if (response)
+            string imageUrl = string.Empty;
+            if (company.Photo != null && company.Photo.Length > 0)
             {
-                imageUrl = fullPath;
-                company.Photo = imageUrl;
-            }
+                imageUrl = string.Empty;
+                byte[] imageArray = Convert.FromBase64String(company.Photo);
+                var stream = new MemoryStream(imageArray);
+                var guid = Guid.NewGuid().ToString();
+                var file = $"{guid}.jpg";
+                var folder = "wwwroot\\images\\Logos";
+                var fullPath = $"~/images/Logos/{file}";
+                var response = _filesHelper.UploadPhoto(stream, folder, file);
 
-            _context.Update(company);
+                if (response)
+                {
+                    imageUrl = fullPath;
+                    oldCompany.Photo = imageUrl;
+                }
+            }
+            
+
+            oldCompany!.Active = company.Active;
+            oldCompany!.Address=company.Address;
+            oldCompany!.Contact = company.Contact;
+            oldCompany.CUIT = company.Contact;
+            oldCompany!.EMail = company.EMail;
+            oldCompany!.Phone = company.Phone;
+            oldCompany!.Name = company.Name;
+            
+            _context.Update(oldCompany);
             try
             {
                 await _context.SaveChangesAsync();

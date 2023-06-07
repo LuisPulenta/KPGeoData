@@ -4,9 +4,7 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Crear Relevamiento</h3>
-
-<SurveyForm @ref="surveyForm" Survey="survey" OnValidSubmit="Create" ReturnAction="Return" />
+<SurveyForm @ref="surveyForm" Survey="survey" OnValidSubmit="Create" ReturnAction="Return" Titulo="Crear Relevamiento" />
 
 @code {
     private Survey survey = new();

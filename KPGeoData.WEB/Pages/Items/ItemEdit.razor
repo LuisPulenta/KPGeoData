@@ -5,15 +5,13 @@
 @inject NavigationManager navigationManager
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Editar Item</h3>
-
 @if (item is null)
 {
      <div class="spinner"/>
 }
 else
 {
-    <ItemForm @ref="itemForm" Item="item" OnValidSubmit="EditAsync" ReturnAction="Return" />
+    <ItemForm @ref="itemForm" Item="item" OnValidSubmit="EditAsync" ReturnAction="Return" Titulo=" Editar Item" />
 }
 
 @code {
@@ -51,7 +49,14 @@ else
             await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
             return;
         }
-
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.Center,
+                ShowConfirmButton = true,
+                Timer = 5000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
         Return();
     }
 
