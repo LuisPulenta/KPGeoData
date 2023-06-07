@@ -38,6 +38,7 @@ else
                         <thead>
                             <tr>
                                 <th style="width:220px">Empresa</th>
+                                <th style="width:220px">Logo</th>
                                 <th style="width:220px">Domicilio</th>
                                 <th style="width:220px">Teléfono</th>
                                 <th style="width:220px">CUIT</th>
@@ -55,6 +56,9 @@ else
                                     <td>
                                         @company.Name
                                     </td>
+
+                                    <td><img src="@company.PhotoFullPath" width="80"/></td>
+
                                     <td>
                                         @company.Address
                                     </td>

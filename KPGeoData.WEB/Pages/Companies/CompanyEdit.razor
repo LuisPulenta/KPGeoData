@@ -4,15 +4,13 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Editar Empresa</h3>
-
 @if (company is null)
 {
      <div class="spinner"/>
 }
 else
 {
-    <CompanyForm @ref="companyForm" Company="company" OnValidSubmit="EditAsync" ReturnAction="Return" />
+    <CompanyForm @ref="companyForm" Company="company" OnValidSubmit="EditAsync" ReturnAction="Return" Titulo=" Editar Empresa" />
 }
 
 @code {

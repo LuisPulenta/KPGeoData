@@ -6,6 +6,8 @@ using KPGeoData.Shared.DTOs;
 using KPGeoData.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Azure.Core;
+using KPGeoData.Shared.Helpers;
 
 namespace KPGeoData.API.Controllers
 {
@@ -15,10 +17,12 @@ namespace KPGeoData.API.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IFilesHelper _filesHelper;
 
-        public CompaniesController(DataContext context)
+        public CompaniesController(DataContext context, IFilesHelper filesHelper)
         {
             _context = context;
+            _filesHelper = filesHelper;
         }
 
         [HttpGet]
@@ -60,6 +64,27 @@ namespace KPGeoData.API.Controllers
         [HttpPost]
         public async Task<ActionResult> Post(Company company)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Foto
+            var imageUrl = string.Empty;
+            byte[] imageArray = Convert.FromBase64String(company.Photo);
+            var stream = new MemoryStream(imageArray);
+            var guid = Guid.NewGuid().ToString();
+            var file = $"{guid}.jpg";
+            var folder = "wwwroot\\images\\Logos";
+            var fullPath = $"~/images/Logos/{file}";
+            var response = _filesHelper.UploadPhoto(stream, folder, file);
+
+            if (response)
+            {
+                imageUrl = fullPath;
+                company.Photo = imageUrl;
+            }
+
             _context.Add(company);
             try
             {
@@ -100,7 +125,30 @@ namespace KPGeoData.API.Controllers
 
         [HttpPut]
         public async Task<ActionResult> Put(Company company)
+
         {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Foto
+            var imageUrl = string.Empty;
+            byte[] imageArray = Convert.FromBase64String(company.Photo);
+            var stream = new MemoryStream(imageArray);
+            var guid = Guid.NewGuid().ToString();
+            var file = $"{guid}.jpg";
+            var folder = "wwwroot\\images\\Logos";
+            var fullPath = $"~/images/Logos/{file}";
+            var response = _filesHelper.UploadPhoto(stream, folder, file);
+
+            if (response)
+            {
+                imageUrl = fullPath;
+                company.Photo = imageUrl;
+            }
+
             _context.Update(company);
             try
             {

@@ -4,73 +4,111 @@
 
 <EditForm EditContext="editContext" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
+    <div class="card">
 
-    <div class="mb-3">
-        <label>Empresa:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Company.Name" />
-            <ValidationMessage For="@(() => Company.Name)" />
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> @Titulo
+                <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Guardar Cambios</button>
+                <button class="btn btn-success btn-sm float-end mx-2" @onclick="ReturnAction"><i class="oi oi-arrow-thick-left"></i> Regresar</button>
+            </span>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>Empresa:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Company.Name" />
+                            <ValidationMessage For="@(() => Company.Name)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Domicilio:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Company.Address" />
+                            <ValidationMessage For="@(() => Company.Address)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Teléfono:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Company.Phone" />
+                            <ValidationMessage For="@(() => Company.Phone)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>CUIT:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Company.CUIT" />
+                            <ValidationMessage For="@(() => Company.CUIT)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>EMail:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Company.EMail" />
+                            <ValidationMessage For="@(() => Company.EMail)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Contacto:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Company.Contact" />
+                            <ValidationMessage For="@(() => Company.Contact)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Activo:</label>
+                        <div>
+                            <input type="checkbox" @bind="@Company.Active">
+                        </div>
+                    </div>
+
+                    <div class="mb-3" >
+                        <InputImg Label="Logo" ImageSelected="ImageSelected" ImageURL="@imageUrl" />
+                    </div>
+
+
+                    
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="mb-3">
-        <label>Domicilio:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Company.Address" />
-            <ValidationMessage For="@(() => Company.Address)" />
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label>Teléfono:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Company.Phone" />
-            <ValidationMessage For="@(() => Company.Phone)" />
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label>CUIT:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Company.CUIT" />
-            <ValidationMessage For="@(() => Company.CUIT)" />
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label>EMail:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Company.EMail" />
-            <ValidationMessage For="@(() => Company.EMail)" />
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label>Contacto:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@Company.Contact" />
-            <ValidationMessage For="@(() => Company.Contact)" />
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label>Activo:</label>
-        <div>
-            <input type="checkbox" @bind="@Company.Active">
-        </div>
-    </div>
-
-    <button class="btn btn-primary btn-sm" type="submit">Guardar Cambios</button>
-    <button class="btn btn-success btn-sm" @onclick="ReturnAction">Regresar</button>
 </EditForm>
 
 @code {
     private EditContext editContext = null!;
+    private string? imageUrl;
 
     protected override void OnInitialized()
     {
         editContext = new(Company);
+        if (!string.IsNullOrEmpty(Company.Photo))
+        {
+            imageUrl = Company.Photo;
+            Company.Photo = null;
+        }
     }
+
+    [Parameter]
+    public string Titulo { get; set; } = null!;
+
+    private void ImageSelected(string imagenBase64)
+    {
+        Company.Photo = imagenBase64;
+        imageUrl = null;
+        var a = 1;
+    }
+
 
     [EditorRequired]
     [Parameter]

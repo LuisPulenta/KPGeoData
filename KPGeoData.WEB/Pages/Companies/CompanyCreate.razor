@@ -4,9 +4,7 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Crear Empresa</h3>
-
-<CompanyForm @ref="companyForm" Company="company" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+<CompanyForm @ref="companyForm" Company="company" OnValidSubmit="CreateAsync" ReturnAction="Return" Titulo="Crear Empresa" />
 
 @code {
     private Company company = new();
