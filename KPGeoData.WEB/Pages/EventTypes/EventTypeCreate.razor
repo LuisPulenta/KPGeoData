@@ -10,6 +10,10 @@
     private EventType eventType = new();
     private EventTypeForm? eventTypeForm;
 
+    [CascadingParameter]
+    BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+
     private async Task CreateAsync()
     {
         var httpResponse = await repository.Post("/api/eventtypes", eventType);
@@ -19,8 +23,12 @@
             await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
             return;
         }
-        eventTypeForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo("/eventTypes");
+
+        await BlazoredModal.CloseAsync(ModalResult.Ok());
+        Return();
+
+        //eventTypeForm!.FormPostedSuccessfully = true;
+        //navigationManager.NavigateTo("/eventTypes");
     }   
 
     private void Return()

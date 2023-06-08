@@ -15,7 +15,7 @@ else
         <div class="card-header">
             <span>
                 <i class="oi oi-globe"></i> Items
-                <a class="btn btn-sm btn-primary float-end" href="/itemTypes/create"><i class="oi oi-plus"></i> Nuevo Item</a>
+                <a class="btn btn-sm btn-primary float-end" @onclick=@(() => ShowModal())><i class="oi oi-plus"></i> Nuevo Item</a>
             </span>
         </div>
         <div class="card-body">
@@ -55,7 +55,7 @@ else
                                     </td>
 
                                     <td>
-                                        <a href="/itemTypes/edit/@itemType.Id" class="btn btn-warning btn-sm">Editar</a>
+                                        <a @onclick=@(() => ShowModal(itemType.Id, true)) class="btn btn-warning btn-sm"><i class="oi oi-pencil" /> Editar</a>
                                         <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(itemType.Id))>Borrar</button>
                                     </td>
                                 </tr>
@@ -72,6 +72,9 @@ else
     public List<ItemType>? itemTypes { get; set; }
     private int currentPage = 1;
     private int totalPages;
+
+    [CascadingParameter]
+    IModalService Modal { get; set; } = default!;
 
     [Parameter]
     [SupplyParameterFromQuery]
@@ -180,4 +183,24 @@ else
         await LoadAsync(page);
         await SelectedPage(page);
     }
+    private async Task ShowModal(int id = 0, bool isEdit = false)
+    {
+        IModalReference modalReference;
+
+        if (isEdit)
+        {
+            modalReference = Modal.Show<ItemTypeEdit>(string.Empty, new ModalParameters().Add("Id", id));
+        }
+        else
+        {
+            modalReference = Modal.Show<ItemTypeCreate>();
+        }
+
+        var result = await modalReference.Result;
+        if (result.Confirmed)
+        {
+            await LoadAsync();
+        }
+    }
+
 }

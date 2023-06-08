@@ -10,6 +10,9 @@
     private State state = new();
     private StateForm? stateForm;
 
+    [CascadingParameter]
+    BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
     private async Task CreateAsync()
     {
         var httpResponse = await repository.Post("/api/states", state);
@@ -19,8 +22,11 @@
             await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
             return;
         }
-        stateForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo("/states");
+        await BlazoredModal.CloseAsync(ModalResult.Ok());
+        Return();
+
+        //stateForm!.FormPostedSuccessfully = true;
+        //navigationManager.NavigateTo("/states");
     }   
 
     private void Return()

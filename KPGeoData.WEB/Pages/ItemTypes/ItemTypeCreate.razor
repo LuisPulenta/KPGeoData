@@ -11,6 +11,10 @@
     private ItemType itemType = new();
     private ItemTypeForm? itemTypeForm;
 
+    [CascadingParameter]
+    BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+
     private async Task CreateAsync()
     {
         var httpResponse = await repository.Post("/api/itemtypes", itemType);
@@ -20,8 +24,12 @@
             await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
             return;
         }
-        itemTypeForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo("/itemTypes");
+
+        await BlazoredModal.CloseAsync(ModalResult.Ok());
+        Return();
+
+        //itemTypeForm!.FormPostedSuccessfully = true;
+        //navigationManager.NavigateTo("/itemTypes");
     }   
 
     private void Return()

@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using CurrieTechnologies.Razor.SweetAlert2;
 using KPGeoData.WEB;
 using KPGeoData.WEB.Auth;
@@ -17,6 +18,7 @@ builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri("http
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddSweetAlert2();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddBlazoredModal();
 //builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderTest>();
 
 builder.Services.AddScoped<AuthenticationProviderJWT>();
