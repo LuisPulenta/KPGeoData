@@ -123,7 +123,7 @@ else
 
     private async Task SaveUserAsync()
     {
-        var responseHttp = await repository.Put<User>("/api/accounts", user!);
+        var responseHttp = await repository.Put<User, TokenDTO>("/api/accounts", user!);
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessage();
@@ -138,6 +138,7 @@ else
                 Timer = 5000
             });
         await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+        await loginService.LoginAsync(responseHttp.Response!.Token);
         navigationManager.NavigateTo("/");
     }
 }
