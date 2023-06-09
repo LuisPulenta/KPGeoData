@@ -69,7 +69,14 @@ namespace KPGeoData.API.Controllers
             if (result.Succeeded)
             {
                 var user = await _userHelper.GetUserAsync(model.Email);
-                return Ok(BuildToken(user));
+                if (user.UserType != UserType.UserApp)
+                {
+                    return Ok(BuildToken(user));
+                }else
+                {
+                    return BadRequest("Usuario App no tiene permiso para ingresar a la Web.");
+                }
+                
             }
 
             if (result.IsLockedOut)
@@ -306,6 +313,53 @@ namespace KPGeoData.API.Controllers
         public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
         {
             var queryable = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.FirstName.ToLower().Contains(pagination.Filter.ToLower()) ||
+                                                    x.LastName.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
+            return Ok(totalPages);
+        }
+
+
+        [HttpGet("allApp/{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> GetAllApp([FromQuery] PaginationDTO pagination,int id)
+        {
+            var queryable = _context.Users
+                .Where (c=>c.CompanyId==id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(
+                    x => x.FirstName.ToLower().Contains(pagination.Filter.ToLower())
+                         || x.LastName.ToLower().Contains(pagination.Filter.ToLower())
+                         || x.Company!.Name.ToLower().Contains(pagination.Filter.ToLower())
+                         )
+                    //.Where(u => u.UserType!=UserType.Admin)
+                    ;
+            }
+
+            return Ok(await queryable
+                .OrderBy(x => x.UserType)
+                .ThenBy(x => x.LastName)
+                .ThenBy(x => x.FirstName)
+
+                .Paginate(pagination)
+                .ToListAsync());
+        }
+
+        [HttpGet("totalPages/{id:int}")]
+        public async Task<ActionResult> GetPagesAll([FromQuery] PaginationDTO pagination, int id)
+        {
+            var queryable = _context.Users
+                .Where(c => c.CompanyId == id)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {

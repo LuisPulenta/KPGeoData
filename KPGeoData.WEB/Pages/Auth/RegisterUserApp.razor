@@ -1,0 +1,114 @@
+﻿@page "/registerUserApp"
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+
+<EditForm Model="userDTO" OnValidSubmit="CreateUserAsync">
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> Registrar Nuevo Usuario App
+                <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Registrar</button>
+                <a class="btn btn-sm btn-success float-end mx-2" href="/usersApp"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+
+            </span>
+        </div>
+        <div class="card-body">
+
+
+            <div class="row">
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>Nombre:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.FirstName" />
+                            <ValidationMessage For="@(() => userDTO.FirstName)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Apellido:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.LastName" />
+                            <ValidationMessage For="@(() => userDTO.LastName)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Documento:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.Document" />
+                            <ValidationMessage For="@(() => userDTO.Document)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Teléfono:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.PhoneNumber" />
+                            <ValidationMessage For="@(() => userDTO.PhoneNumber)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Email:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@userDTO.Email" />
+                            <ValidationMessage For="@(() => userDTO.Email)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>Contraseña:</label>
+                        <div>
+                            <InputText type="password" class="form-control" @bind-Value="@userDTO.Password" />
+                            <ValidationMessage For="@(() => userDTO.Password)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Confirmación de contraseña:</label>
+                        <div>
+                            <InputText type="password" class="form-control" @bind-Value="@userDTO.PasswordConfirm" />
+                            <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    private UserDTO userDTO = new();
+    private List<Company>? companies;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int userType { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        userDTO.UserType = UserType.UserApp;
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        User userLogged = userResponseHppt.Response!;
+        userDTO.CompanyId = userLogged.CompanyId;
+        userDTO.Active = true;
+    }
+
+    private async Task CreateUserAsync()
+    {
+        userDTO.UserName = userDTO.Email;
+
+        var responseHttp = await repository.Post<UserDTO>("/api/accounts/CreateUser", userDTO);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        await sweetAlertService.FireAsync("Confirmación", "La cuenta ha sido creada con éxito. Se ha enviado un correo electrónico con las instrucciones para activar el usuario.", SweetAlertIcon.Info);
+        navigationManager.NavigateTo("/usersApp");
+    }
+}
