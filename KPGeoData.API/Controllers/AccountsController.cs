@@ -1,9 +1,12 @@
-﻿using KPGeoData.API.Helpers;
+﻿using KPGeoData.API.Data;
+using KPGeoData.API.Helpers;
 using KPGeoData.Shared.DTOs;
 using KPGeoData.Shared.Entities;
+using KPGeoData.Shared.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,12 +18,14 @@ namespace KPGeoData.API.Controllers
     [Route("/api/accounts")]
     public class AccountsController : ControllerBase
     {
+        private readonly DataContext _context;
         private readonly IUserHelper _userHelper;
         private readonly IConfiguration _configuration;
         private readonly IMailHelper _mailHelper;
 
-        public AccountsController(IUserHelper userHelper, IConfiguration configuration, IMailHelper mailHelper)
+        public AccountsController(DataContext context, IUserHelper userHelper, IConfiguration configuration, IMailHelper mailHelper)
         {
+            _context = context;
             _userHelper = userHelper;
             _configuration = configuration;
             _mailHelper = mailHelper;
@@ -267,5 +272,51 @@ namespace KPGeoData.API.Controllers
 
             return BadRequest(result.Errors.FirstOrDefault()!.Description);
         }
+
+        [HttpGet("all")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> GetAll([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Users
+                .Include(u => u.Company)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(
+                    x => x.FirstName.ToLower().Contains(pagination.Filter.ToLower())
+                         || x.LastName.ToLower().Contains(pagination.Filter.ToLower()) 
+                         || x.Company!.Name.ToLower().Contains(pagination.Filter.ToLower())
+                         )
+                    //.Where(u => u.UserType!=UserType.Admin)
+                    ;
+            }
+
+            return Ok(await queryable
+                .OrderBy(x => x.Company!.Name)
+                .ThenBy(x => x.UserType)
+                .ThenBy(x => x.LastName)
+                .ThenBy(x => x.FirstName)
+
+                .Paginate(pagination)
+                .ToListAsync());
+        }
+
+        [HttpGet("totalPages")]
+        public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.FirstName.ToLower().Contains(pagination.Filter.ToLower()) ||
+                                                    x.LastName.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
+            return Ok(totalPages);
+        }
+
     }
 }

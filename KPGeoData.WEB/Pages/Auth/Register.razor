@@ -1,9 +1,8 @@
-﻿@page "/registerUserApp"
+﻿@page "/register"
 @inject IRepository repository
 @inject SweetAlertService sweetAlertService
 @inject NavigationManager navigationManager
 @inject ILoginService loginService
-
 
 <EditForm Model="userDTO" OnValidSubmit="CreateUserAsync">
     <DataAnnotationsValidator />
@@ -11,11 +10,14 @@
     <div class="card">
         <div class="card-header">
             <span>
-                <i class="oi oi-person" /> Registrar Nuevo  Usuario App
+                <i class="oi oi-person" /> @title
                 <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Registrar</button>
+                <a class="btn btn-sm btn-success float-end mx-2" href="/users"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+
             </span>
         </div>
         <div class="card-body">
+
 
             <div class="row">
                 <div class="col-6">
@@ -57,21 +59,27 @@
                 </div>
                 <div class="col-6">
                     <div class="mb-3">
-                        <label>Empresa:</label>
-                        <div>
-                            <select class="form-select" @bind="userDTO.CompanyId">
-                                <option value="0">-- Seleccione una Empresa --</option>
-                                @if (companies is not null)
-                                {
-                                    @foreach (var company in companies)
+                        
+                        @if (userType !=0)
+                        {
+                            <label>Empresa:</label>
+                            <div>
+                                <select class="form-select" @bind="userDTO.CompanyId">
+                                    <option value="0">-- Seleccione una Empresa --</option>
+                                    @if (companies is not null)
                                     {
-                                                <option value="@company.Id">@company.Name</option>
+                                        @foreach (var company in companies)
+                                        {
+                                            <option value="@company.Id">@company.Name</option>
+                                        }
                                     }
-                                }
-                            </select>
-                            <ValidationMessage For="@(() => userDTO.CompanyId)" />
-                        </div>
+                                </select>
+                                <ValidationMessage For="@(() => userDTO.CompanyId)" />
+                            </div>
+                        }
+                        
                     </div>
+
                     <div class="mb-3">
                         <label>Contraseña:</label>
                         <div>
@@ -90,15 +98,35 @@
             </div>
         </div>
     </div>
+
 </EditForm>
 
 @code {
     private UserDTO userDTO = new();
     private List<Company>? companies;
+    private String? title;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int userType { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCompaniesAsync();
+        if (userType == 0)
+        {
+            title = "Registrar Nuevo Administrador";
+            userDTO.CompanyId = 1;
+        }
+        else if (userType == 1)
+        {
+            title = "Registrar Nuevo Usuario Web";
+        }
+        else
+        {
+            title = "Registrar Nuevo Usuario App";
+        }
     }
 
 
@@ -115,10 +143,24 @@
         companies = responseHttp.Response;
     }
 
+
+
     private async Task CreateUserAsync()
     {
         userDTO.UserName = userDTO.Email;
-        userDTO.UserType = UserType.UserApp;
+        if (userType==0)
+        {
+            userDTO.UserType = UserType.Admin;
+        }
+        else if (userType == 1)
+        {
+            userDTO.UserType = UserType.UserWeb;
+        }
+        else 
+        {
+            userDTO.UserType = UserType.UserApp;
+        }
+
         userDTO.Active = true;
         var responseHttp = await repository.Post<UserDTO>("/api/accounts/CreateUser", userDTO);
         if (responseHttp.Error)
@@ -128,6 +170,6 @@
             return;
         }
         await sweetAlertService.FireAsync("Confirmación", "La cuenta ha sido creada con éxito. Se ha enviado un correo electrónico con las instrucciones para activar el usuario.", SweetAlertIcon.Info);
-        navigationManager.NavigateTo("/");
+        navigationManager.NavigateTo("/users");
     }
 }
