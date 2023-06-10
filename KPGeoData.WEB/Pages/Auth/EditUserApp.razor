@@ -2,7 +2,7 @@
 @inject NavigationManager navigationManager
 @inject IRepository repository
 @inject SweetAlertService sweetAlertService
-@attribute [Authorize(Roles = "UserWeb")]
+@attribute [Authorize(Roles = "Admin,UserWeb")]
 
 @if (user is null)
 {
@@ -16,9 +16,16 @@ else
             <div class="card-header">
                 <span>
                     <i class="oi oi-person" /> Editar Usuario
-                    <a class="btn btn-sm btn-primary float-end" @onclick=@(() => ShowModal())><i class="oi oi-plus"></i> Cambiar Contraseña</a>
-
                     <button class="btn btn-sm btn-primary float-end mx-2" type="submit"><i class="oi oi-check" /> Guardar Cambios</button>
+                    @if (userLogged!.UserType == UserType.UserWeb)
+                    {
+                        <a class="btn btn-sm btn-success float-end mx-2" href="/usersApp"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+                    }
+                    @if (userLogged!.UserType == UserType.Admin)
+                    {
+                        <a class="btn btn-sm btn-success float-end mx-2" href="/users"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+                    }
+                    
                 </span>
             </div>
             <div class="card-body">
@@ -122,7 +129,16 @@ else
                 Timer = 5000
             });
         await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
-        navigationManager.NavigateTo("/usersApp");
+
+        if(userLogged.UserType==UserType.UserWeb)
+        {
+            navigationManager.NavigateTo("/usersApp");
+        }
+        else
+        {
+            navigationManager.NavigateTo("/users");
+        }
+
     }
 
     private async Task ShowModal(int id = 0, bool isEdit = false)
