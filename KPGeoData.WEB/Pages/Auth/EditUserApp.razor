@@ -1,0 +1,135 @@
+﻿@page "/edituserapp/{Id}"
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@attribute [Authorize(Roles = "UserWeb")]
+
+@if (user is null)
+{
+    <div class="spinner" />
+}
+else
+{
+    <EditForm Model="user" OnValidSubmit="SaveUserAsync">
+        <DataAnnotationsValidator />
+        <div class="card">
+            <div class="card-header">
+                <span>
+                    <i class="oi oi-person" /> Editar Usuario
+                    <a class="btn btn-sm btn-primary float-end" @onclick=@(() => ShowModal())><i class="oi oi-plus"></i> Cambiar Contraseña</a>
+
+                    <button class="btn btn-sm btn-primary float-end mx-2" type="submit"><i class="oi oi-check" /> Guardar Cambios</button>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label>Nombres:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@user.FirstName" />
+                                <ValidationMessage For="@(() => user.FirstName)" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Apellidos:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@user.LastName" />
+                                <ValidationMessage For="@(() => user.LastName)" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Documento:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@user.Document" />
+                                <ValidationMessage For="@(() => user.Document)" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Teléfono:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@user.PhoneNumber" />
+                                <ValidationMessage For="@(() => user.PhoneNumber)" />
+                            </div>
+                        </div>
+
+                        @if(@user.Email!=@userLogged!.Email){
+                        <div class="mb-3">
+                            <label>Activo:</label>
+                            <div>
+                                <input type="checkbox" @bind="@user.Active">
+                            </div>
+                        </div>
+                        }
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private User? user;
+    private User? userLogged;
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [CascadingParameter]
+    IModalService Modal { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserAsyc();
+        var a = 1;
+    }
+
+    private async Task LoadUserAsyc()
+    {
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt.Response!;
+
+        var responseHTTP = await repository.Get<User>($"/api/accounts/GetUserById/{Id}");
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+                return;
+            }
+            var messageError = await responseHTTP.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            return;
+        }
+        user = responseHTTP.Response;
+    }
+
+    private async Task SaveUserAsync()
+    {
+        var responseHttp = await repository.Put<User, TokenDTO>("/api/accounts", user!);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.Center,
+                ShowConfirmButton = true,
+                Timer = 5000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+        navigationManager.NavigateTo("/usersApp");
+    }
+
+    private async Task ShowModal(int id = 0, bool isEdit = false)
+    {
+        IModalReference modalReference;
+        modalReference = Modal.Show<ChangePassword>();
+
+        await modalReference.Result;
+    }
+}

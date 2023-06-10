@@ -5,6 +5,7 @@ using KPGeoData.Shared.Entities;
 using KPGeoData.Shared.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -139,6 +140,7 @@ namespace KPGeoData.API.Controllers
                 currentUser.LastName = user.LastName;
                 currentUser.PhoneNumber = user.PhoneNumber;
                 currentUser.CompanyId = user.CompanyId;
+                currentUser.Active = user.Active;
 
                 var result = await _userHelper.UpdateUserAsync(currentUser);
                 if (result.Succeeded)
@@ -179,7 +181,7 @@ namespace KPGeoData.API.Controllers
             var result = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors.FirstOrDefault().Description);
+                return BadRequest(result.Errors.FirstOrDefault()!.Description);
             }
             return NoContent();
         }
@@ -372,5 +374,24 @@ namespace KPGeoData.API.Controllers
             return Ok(totalPages);
         }
 
+        [HttpGet]
+        [Route("/api/accounts/GetUserById/{id}")]
+        public async Task<User> GetUserById(string Id)
+        {
+            User user = await _userHelper.GetUserAsync(new Guid(Id));
+            return user!;
+        }
+
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> DeleteAsync(string id)
+        {
+             User user = await _userHelper.GetUserAsync(new Guid(id));
+            if (user == null)
+            {
+                return NotFound();
+            }
+            await _userHelper.DeleteUserAsync(user);
+            return NoContent();
+        }
     }
 }

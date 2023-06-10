@@ -44,7 +44,7 @@ namespace KPGeoData.Shared.Entities
         public string? Photo { get; set; }
         public string PhotoFullPath => string.IsNullOrEmpty(Photo)
         ? $"https://localhost:7217/images/Logos/noimage.png"
-        : $"https://localhost:7217{Photo.Substring(1)}";
+        : $"https://localhost:7217{Photo[1..]}";
 
         public ICollection<Survey>? Surveys { get; set; }
 

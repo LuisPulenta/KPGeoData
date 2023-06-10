@@ -43,6 +43,8 @@ else
                         <th>Teléfono</th>
                         <th>Email</th>
                         <th>Confirmado</th>
+                        <th>Activo</th>
+                        <th></th>
 
                     </tr>
                 </thead>
@@ -57,6 +59,12 @@ else
                             <td>@user.PhoneNumber</td>
                             <td>@user.Email</td>
                             <td>@user.EmailConfirmed</td>
+                            <td>@user.Active</td>
+
+                            <td>
+                                <a href="/edituserapp/@user.Id" class="btn btn-warning btn-sm"><i class="oi oi-pencil" /> Editar</a>
+                                <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(user.Id))><i class="oi oi-trash" /> Borrar</button>
+                            </td>
 
                         </tr>
                     }
@@ -135,6 +143,47 @@ else
     private async Task CleanFilterAsync()
     {
         Filter = string.Empty;
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync(String id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var httpResponse = await repository.Delete($"/api/accounts/{id}");
+
+        if (httpResponse.Error)
+        {
+            if (httpResponse.HttpResponseMessage.StatusCode != HttpStatusCode.NotFound)
+            {
+                var messageError = await httpResponse.GetErrorMessage();
+                await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+                return;
+            }
+        }
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.Center,
+                ShowConfirmButton = true,
+                Timer = 5000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro eliminado con éxito.");
         await LoadAsync();
     }
 }

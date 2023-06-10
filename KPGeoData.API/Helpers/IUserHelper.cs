@@ -15,6 +15,7 @@ namespace KPGeoData.API.Helpers
         Task LogoutAsync();
         Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
         Task<IdentityResult> UpdateUserAsync(User user);
+        Task<IdentityResult> DeleteUserAsync(User user);
         Task<User> GetUserAsync(Guid userId);
         Task<string> GenerateEmailConfirmationTokenAsync(User user);
         Task<IdentityResult> ConfirmEmailAsync(User user, string token);

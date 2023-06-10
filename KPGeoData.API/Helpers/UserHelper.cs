@@ -85,6 +85,11 @@ namespace Sales2023.API.Helpers
             return await _userManager.UpdateAsync(user);
         }
 
+        public async Task<IdentityResult> DeleteUserAsync(User user)
+        {
+            return await _userManager.DeleteAsync(user);
+        }
+
         public async Task<string> GenerateEmailConfirmationTokenAsync(User user)
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);

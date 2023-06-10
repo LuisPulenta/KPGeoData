@@ -70,7 +70,7 @@ namespace KPGeoData.API.Controllers
             }
 
             //Foto
-            var imageUrl = string.Empty;
+            
             byte[] imageArray = Convert.FromBase64String(company.Photo);
             var stream = new MemoryStream(imageArray);
             var guid = Guid.NewGuid().ToString();
@@ -81,8 +81,7 @@ namespace KPGeoData.API.Controllers
 
             if (response)
             {
-                imageUrl = fullPath;
-                company.Photo = imageUrl;
+                company.Photo = fullPath;
             }
 
             _context.Add(company);
@@ -151,7 +150,7 @@ namespace KPGeoData.API.Controllers
                 if (response)
                 {
                     imageUrl = fullPath;
-                    oldCompany.Photo = imageUrl;
+                    oldCompany!.Photo = imageUrl;
                 }
             }
             
