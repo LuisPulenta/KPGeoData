@@ -1,0 +1,83 @@
+﻿@page "/surveyitemtypes/{SurveyId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@attribute [Authorize(Roles = "UserWeb")]
+
+@if (survey is null)
+{
+    <div class="spinner" />
+}
+else
+{
+    <div class="card">
+
+        <div class="card-header">
+            <span>
+                <i class="oi oi-spreadsheet" /> Items para el Relevamiento @survey.Name
+                <a class="btn btn-sm btn-success float-end mx-2" href="/surveys/details/@survey.Id"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+            </span>
+        </div>
+
+        <div class="card-body">
+            
+            <div class="col-6">
+
+                <span>
+                    <label>Item:</label>
+                    <i>
+                        <InputText class="form-control" @bind-Value="@itemtype" />
+                    </i>
+                    <a class="mx-1">
+                        <button type="button" class="btn btn-outline-primary" @onclick="AddState"><i class="oi oi-add" /> Agregar Item</button>
+                    </a>
+                </span>
+
+
+
+            <div class="mb-3">
+               
+                </div>
+              
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private Survey? survey;
+    private User? userLogged;
+    private string? itemtype;
+
+    [Parameter]
+    public int SurveyId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt.Response!;
+
+        var userResponseHppt2 = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt2.Response!;
+
+        var responseHttp = await repository.Get<Survey>($"/api/surveys/{SurveyId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/companies");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        survey = responseHttp.Response;
+    }
+    private async Task AddState()
+    {
+        
+    }
+}

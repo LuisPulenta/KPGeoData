@@ -16,7 +16,10 @@ namespace KPGeoData.API.Data
         public DbSet<ItemType> ItemTypes { get; set; }
         public DbSet<State> States { get; set; }
         public DbSet<Survey> Surveys { get; set; }
-        
+        public DbSet<SurveyEventType> SurveyEventTypes { get; set; }
+        public DbSet<SurveyItemType> SurveyItemTypes { get; set; }
+        public DbSet<SurveyState> SurveyStates { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -26,6 +29,9 @@ namespace KPGeoData.API.Data
             modelBuilder.Entity<ItemType>().HasIndex(c => c.Name).IsUnique();
             modelBuilder.Entity<State>().HasIndex(c => c.Name).IsUnique();
             modelBuilder.Entity<EventType>().HasIndex(c => c.Name).IsUnique();
+            modelBuilder.Entity<SurveyEventType>().HasIndex("EventType", "SurveyId").IsUnique();
+            modelBuilder.Entity<SurveyItemType>().HasIndex("ItemType", "SurveyId").IsUnique();
+            modelBuilder.Entity<SurveyState>().HasIndex("State", "SurveyId").IsUnique();
         }
     }
 }
