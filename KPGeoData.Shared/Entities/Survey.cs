@@ -19,6 +19,9 @@ namespace KPGeoData.Shared.Entities
         public bool Active { get; set; }
 
         public ICollection<Item>? Items { get; set; }
+        public ICollection<SurveyState>? SurveyStates { get; set; }
+        public ICollection<SurveyEventType>? SurveyEventTypes { get; set; }
+        public ICollection<SurveyItemType>? SurveyItemTypes { get; set; }
 
         [Display(Name = "Items")]
         public int ItemsNumber => Items == null ? 0 : Items.Count;

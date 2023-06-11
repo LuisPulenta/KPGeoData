@@ -29,9 +29,9 @@ namespace KPGeoData.API.Data
             modelBuilder.Entity<ItemType>().HasIndex(c => c.Name).IsUnique();
             modelBuilder.Entity<State>().HasIndex(c => c.Name).IsUnique();
             modelBuilder.Entity<EventType>().HasIndex(c => c.Name).IsUnique();
-            modelBuilder.Entity<SurveyEventType>().HasIndex("EventType", "SurveyId").IsUnique();
-            modelBuilder.Entity<SurveyItemType>().HasIndex("ItemType", "SurveyId").IsUnique();
-            modelBuilder.Entity<SurveyState>().HasIndex("State", "SurveyId").IsUnique();
+            modelBuilder.Entity<SurveyEventType>().HasIndex("EventTypeId", "SurveyId").IsUnique();
+            modelBuilder.Entity<SurveyItemType>().HasIndex("ItemTypeId", "SurveyId").IsUnique();
+            modelBuilder.Entity<SurveyState>().HasIndex("StateId", "SurveyId").IsUnique();
         }
     }
 }

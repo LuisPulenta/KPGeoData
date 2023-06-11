@@ -128,34 +128,55 @@ namespace KPGeoData.API.Controllers
             return Ok(survey);
         }
 
-
-
         [HttpPost]
-        public async Task<ActionResult> Post(Survey survey)
+        public async Task<ActionResult> Post(SurveyDTO surveyDTO)
         {
-            survey.Date = DateTime.Now;
-            _context.Add(survey);
             try
             {
+                Survey newSurvey = new()
+                {
+                    Name = surveyDTO.Name,
+                    Active = surveyDTO.Active,
+                    CompanyId = surveyDTO.CompanyId,
+                    Date = DateTime.Now,
+                    Id = surveyDTO.Id,
+                    SurveyEventTypes = new List<SurveyEventType>(),
+                    SurveyItemTypes = new List<SurveyItemType>(),
+                    SurveyStates = new List<SurveyState>(),
+                };
+
+                foreach (var itemTypeIds in surveyDTO.ItemTypeIds!)
+                {
+                    newSurvey.SurveyItemTypes.Add(new SurveyItemType { ItemType = await _context.ItemTypes.FirstOrDefaultAsync(x => x.Id == itemTypeIds) });
+                }
+                foreach (var eventTypeIds in surveyDTO.EventTypeIds!)
+                {
+                    newSurvey.SurveyEventTypes.Add(new SurveyEventType { EventType = await _context.EventTypes.FirstOrDefaultAsync(x => x.Id == eventTypeIds) });
+                }
+                foreach (var stateIds in surveyDTO.StateIds!)
+                {
+                    newSurvey.SurveyStates.Add(new SurveyState { State = await _context.States.FirstOrDefaultAsync(x => x.Id == stateIds) });
+                }
+
+                _context.Add(newSurvey);
                 await _context.SaveChangesAsync();
-                return Ok(survey);
+                return Ok(surveyDTO);
             }
             catch (DbUpdateException dbUpdateException)
             {
-                if (dbUpdateException.InnerException!.Message.Contains("duplicada"))
+                if (dbUpdateException.InnerException!.Message.Contains("duplicate"))
                 {
-                    return BadRequest("Ya existe un Relevamiento con el mismo nombre.");
+                    return BadRequest("Ya existe una ciudad con el mismo nombre.");
                 }
-                else
-                {
-                    return BadRequest(dbUpdateException.InnerException.Message);
-                }
+
+                return BadRequest(dbUpdateException.Message);
             }
             catch (Exception exception)
             {
                 return BadRequest(exception.Message);
             }
         }
+
 
         [HttpPut]
         public async Task<ActionResult> Put(Survey survey)

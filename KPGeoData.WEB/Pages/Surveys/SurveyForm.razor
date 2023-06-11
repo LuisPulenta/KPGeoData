@@ -15,19 +15,47 @@
         </div>
 
         <div class="card-body">
-            <div class="mb-3">
-                <label>Relevamiento:</label>
-                <div>
-                    <InputText class="form-control" @bind-Value="@Survey.Name" />
-                    <ValidationMessage For="@(() => Survey.Name)" />
-                </div>
-            </div>
+            <div class="row">
+                <div class="col-6">
 
-            <div class="mb-3">
-                <label>Activo:</label>
-                <div>
-                    <input type="checkbox" @bind="@Survey.Active">
+                    <div class="mb-3">
+                        <label>Relevamiento:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@SurveyDTO.Name" />
+                            <ValidationMessage For="@(() => SurveyDTO.Name)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Activo:</label>
+                        <div>
+                            <input type="checkbox" @bind="@SurveyDTO.Active">
+                        </div>
+                    </div>
                 </div>
+
+                <div class="col-6">
+                    <div class="mb-3">
+                        <label>Estados:</label>
+                        <div>
+                            <MultipleSelector NonSelected="nonSelectedStates" Selected="selectedStates" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Eventos:</label>
+                        <div>
+                            <MultipleSelector NonSelected="nonSelectedEvents" Selected="selectedEvents" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Items:</label>
+                        <div>
+                            <MultipleSelector NonSelected="nonSelectedItems" Selected="selectedItems" />
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>
@@ -36,9 +64,19 @@
 @code {
     private EditContext editContext = null!;
 
+    private List<MultipleSelectorModel> selectedStates { get; set; } = new();
+    private List<MultipleSelectorModel> nonSelectedStates { get; set; } = new();
+
+    private List<MultipleSelectorModel> selectedEvents { get; set; } = new();
+    private List<MultipleSelectorModel> nonSelectedEvents { get; set; } = new();
+
+    private List<MultipleSelectorModel> selectedItems { get; set; } = new();
+    private List<MultipleSelectorModel> nonSelectedItems { get; set; } = new();
+
+
     [Parameter]
     [EditorRequired]
-    public Survey Survey { get; set; } = null!;
+    public SurveyDTO SurveyDTO { get; set; } = null!;
 
     [Parameter]
     [EditorRequired]
@@ -50,12 +88,41 @@
 
     public bool FormPostedSuccessfully { get; set; }
 
-    protected override void OnInitialized()
-    {
-        editContext = new(Survey);
-    }
     [Parameter]
     public string Titulo { get; set; } = null!;
+
+    [Parameter]
+    public List<State> SelectedStates { get; set; } = new();
+
+    [Parameter]
+    [EditorRequired]
+    public List<State> NonSelectedStates { get; set; } = new();
+
+    [Parameter]
+    public List<EventType> SelectedEvents { get; set; } = new();
+
+    [Parameter]
+    [EditorRequired]
+    public List<EventType> NonSelectedEvents { get; set; } = new();
+
+    [Parameter]
+    public List<ItemType> SelectedItems { get; set; } = new();
+
+    [Parameter]
+    [EditorRequired]
+    public List<ItemType> NonSelectedItems { get; set; } = new();
+
+
+    protected override void OnInitialized()
+    {
+        editContext = new(SurveyDTO);
+        selectedStates = SelectedStates.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+        nonSelectedStates = NonSelectedStates.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+        selectedEvents = SelectedEvents.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+        nonSelectedEvents = NonSelectedEvents.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+        selectedItems = SelectedItems.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+        nonSelectedItems = NonSelectedItems.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+    }
 
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {

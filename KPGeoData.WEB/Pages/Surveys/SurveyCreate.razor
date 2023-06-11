@@ -4,11 +4,34 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin, UserWeb")]
 
-<SurveyForm @ref="surveyForm" Survey="survey" OnValidSubmit="Create" ReturnAction="Return" Titulo="Crear Relevamiento" />
+
+@if (loading)
+{
+    <div class="spinner" />
+}
+else
+{
+    <SurveyForm @ref="surveyForm" SurveyDTO="surveyDTO" NonSelectedStates="nonSelectedStates" NonSelectedEvents="nonSelectedEventTypes" NonSelectedItems="nonSelectedItemTypes" OnValidSubmit="Create" ReturnAction="Return" Titulo="Crear Relevamiento" />
+}
+
+
 
 @code {
-    private Survey survey = new();
+    private SurveyDTO surveyDTO = new SurveyDTO
+        {
+            StateIds = new List<int>(),
+            EventTypeIds = new List<int>(),
+            ItemTypeIds = new List<int>()
+        };
     private SurveyForm? surveyForm;
+    private List<State> selectedStates = new();
+    private List<State> nonSelectedStates = new();
+    private List<ItemType> selectedItemTypes = new();
+    private List<ItemType> nonSelectedItemTypes = new();
+    private List<EventType> selectedEventTypes = new();
+    private List<EventType> nonSelectedEventTypes = new();
+    private bool loading = true;
+
     private User? userLogged;
 
     [Parameter]
@@ -18,12 +41,29 @@
     {
         var userResponseHppt = await repository.Get<User>("/api/accounts");
         userLogged = userResponseHppt.Response!;
+        loading = false;
+
+        var httpResponse = await repository.Get<List<State>>("/api/states");
+        var httpResponse2 = await repository.Get<List<ItemType>>("/api/itemtypes");
+        var httpResponse3 = await repository.Get<List<EventType>>("/api/eventtypes");
+        
+        if (httpResponse.Error || httpResponse2.Error || httpResponse3.Error)
+        {
+            var message = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        nonSelectedStates = httpResponse.Response!;
+        nonSelectedItemTypes = httpResponse2.Response!;
+        nonSelectedEventTypes = httpResponse3.Response!;
+
     }
     private async Task Create()
     {
 
-        survey.CompanyId = CompanyId;
-        var httpResponse = await repository.Post("/api/surveys", survey);
+        surveyDTO.CompanyId = CompanyId;
+        var httpResponse = await repository.Post("/api/surveys", surveyDTO);
+        
         if (httpResponse.Error)
         {
             var message = await httpResponse.GetErrorMessage();
