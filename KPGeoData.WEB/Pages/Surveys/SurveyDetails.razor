@@ -2,7 +2,7 @@
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, UserWeb")]
 
 @if (survey is null)
 {
@@ -14,7 +14,18 @@ else
         <div class="card-header">
             <span>
                 <i class="oi oi-globe"></i> @survey.Name
-                <a class="btn btn-sm btn-success float-end mx-2" href="/companies/details/@survey.CompanyId"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+                @if (userLogged!.UserType==UserType.Admin)
+                {
+                    <a class="btn btn-sm btn-success float-end mx-2" href="/companies/details/@survey.CompanyId"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+                }
+                else
+                {
+                    <a class="btn btn-sm btn-primary float-end mx-2" href="/companies/details/@survey.CompanyId"><i class="oi oi-task"></i> Estados</a>
+                    <a class="btn btn-sm btn-primary float-end mx-2" href="/companies/details/@survey.CompanyId"><i class="oi oi-sort-ascending"></i> Eventos</a>
+                    <a class="btn btn-sm btn-primary float-end mx-2" href="/companies/details/@survey.CompanyId"><i class="oi oi-spreadsheet"></i> Items</a>
+                    <a class="btn btn-sm btn-success float-end mx-2" href="/surveysbycompany"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
+                }
+                
             </span>
         </div>
         <div class="card-body">
@@ -103,6 +114,7 @@ else
     private List<Item>? items;
     private int currentPage = 1;
     private int totalPages;
+    private User? userLogged;
 
     [Parameter]
     [SupplyParameterFromQuery]
@@ -119,6 +131,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt.Response!;
         await LoadAsync();
     }
 

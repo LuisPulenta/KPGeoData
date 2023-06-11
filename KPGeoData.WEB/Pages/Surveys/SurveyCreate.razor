@@ -2,17 +2,23 @@
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, UserWeb")]
 
 <SurveyForm @ref="surveyForm" Survey="survey" OnValidSubmit="Create" ReturnAction="Return" Titulo="Crear Relevamiento" />
 
 @code {
     private Survey survey = new();
     private SurveyForm? surveyForm;
+    private User? userLogged;
 
     [Parameter]
     public int CompanyId { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt.Response!;
+    }
     private async Task Create()
     {
 
@@ -31,6 +37,13 @@
     private void Return()
     {
         surveyForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo($"/companies/details/{CompanyId}");
+        if (userLogged.UserType==UserType.Admin)
+        {
+            navigationManager.NavigateTo($"/companies/details/{CompanyId}");
+        }
+        else
+        {
+            navigationManager.NavigateTo($"/surveysbycompany");
+        }
     }
 }

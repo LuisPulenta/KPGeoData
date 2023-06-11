@@ -61,6 +61,44 @@ namespace KPGeoData.API.Controllers
             return Ok(totalPages);
         }
 
+        [HttpGet("surveysByCompany/{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> GetsurveysByCompany([FromQuery] PaginationDTO pagination, int id)
+        {
+            var queryable = _context.Surveys
+                .Where(c => c.CompanyId == id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(
+                    x => x.Name.ToLower().Contains(pagination.Filter.ToLower())
+                         );
+            }
+
+            return Ok(await queryable
+                .OrderBy(x => x.Name)
+                .Paginate(pagination)
+                .ToListAsync());
+        }
+
+        [HttpGet("totalPages/{id:int}")]
+        public async Task<ActionResult> GetPagesAll([FromQuery] PaginationDTO pagination, int id)
+        {
+            var queryable = _context.Surveys
+                .Where(c => c.CompanyId == id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
+            return Ok(totalPages);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult> Get(int id)
         {

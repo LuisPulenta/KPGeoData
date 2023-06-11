@@ -2,7 +2,7 @@
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, UserWeb")]
 
 @if (survey is null)
 {
@@ -16,12 +16,16 @@ else
 @code {
     private Survey? survey;
     private SurveyForm? surveyForm;
+    private User? userLogged;
 
     [Parameter]
     public int SurveyId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        var userResponseHppt2 = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt2.Response!;
+
         var responseHttp = await repository.Get<Survey>($"/api/surveys/{SurveyId}");
         if (responseHttp.Error)
         {
@@ -62,6 +66,13 @@ else
     private void Return()
     {
         surveyForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo($"/companies/details/{survey!.CompanyId}");
+        if (userLogged.UserType == UserType.Admin)
+        {
+            navigationManager.NavigateTo($"/companies/details/{survey!.CompanyId}");
+        }
+    else
+        {
+            navigationManager.NavigateTo($"/surveysbycompany");
+        }
     }
 }

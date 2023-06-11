@@ -1,10 +1,10 @@
-﻿@page "/companies/details/{Id:int}"
+﻿@page "/surveysbycompany" 
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "UserWeb")]
 
-@if (company is null)
+@if (surveys is null)
 {
     <div class="spinner" />
 }
@@ -15,9 +15,6 @@ else
             <span>
                 <i class="oi oi-globe"></i> @company.Name
                 <a class="btn btn-sm btn-primary float-end" href="/surveys/create/@company.Id"><i class="oi oi-plus"></i> Nuevo Relevamiento</a>
-                <a class="btn btn-sm btn-success float-end mx-2" href="/companies"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
-                                
-                
             </span>
         </div>
         <div class="card-body">
@@ -80,11 +77,11 @@ else
 }
 
 @code {
+    private User? userLogged;
     private Company? company;
     private List<Survey>? surveys;
     private int currentPage = 1;
     private int totalPages;
-    private User? userLogged;
 
     [Parameter]
     [SupplyParameterFromQuery]
@@ -100,8 +97,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var userResponseHppt2 = await repository.Get<User>("/api/accounts");
-        userLogged = userResponseHppt2.Response!;
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        userLogged = userResponseHppt.Response!;
+        company = userLogged.Company;
         await LoadAsync();
     }
 
@@ -110,6 +108,7 @@ else
         currentPage = page;
         await LoadAsync(page);
     }
+
 
     private async Task LoadAsync(int page = 1)
     {
@@ -125,22 +124,23 @@ else
 
         if (string.IsNullOrEmpty(Filter))
         {
-            url1 = $"/api/surveys?id={Id}&page={page}";
-            url2 = $"/api/surveys/totalPages?id={Id}";
+            url1 = $"/api/surveys/surveysbycompany/{company!.Id}?page={page}";
+            url2 = $"/api/surveys/surveysbycompany/totalPages/{company!.Id}";
         }
         else
         {
-            url1 = $"/api/surveys?id={Id}&page={page}&filter={Filter}";
-            url2 = $"/api/surveys/totalPages?id={Id}&filter={Filter}";
+            url1 = $"/api/surveys/surveysbycompany/{company!.Id}?page={page}&filter={Filter}";
+            url2 = $"/api/surveys/surveysbycompany/totalPages?&filter={Filter}/{company!.Id}"; 
         }
 
 
-        var responseHppt = await repository.Get<Company>($"/api/companies/{Id}");
+        //var responseHppt = await repository.Get<Company>($"/api/companies/{Id}");
         var responseHppt2 = await repository.Get<List<Survey>>(url1);
         var responseHppt3 = await repository.Get<int>(url2);
-        company = responseHppt.Response;
+        //company = responseHppt.Response;
         surveys = responseHppt2.Response;
         totalPages = responseHppt3.Response;
+        var a = 1;
     }
 
     private async Task DeleteAsync(int id)
