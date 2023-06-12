@@ -144,6 +144,16 @@ else
     }
     private async Task DeleteAsync(String id)
     {
+        var userResponseHppt = await repository.Get<User>("/api/accounts");
+        User userLogged = userResponseHppt.Response!;
+
+        if (userLogged.Id==id)
+        {
+            var messageError = "No se puede borrar a uno mismo!!!";
+            await sweetAlertService.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            return;            
+        }
+
         var result = await sweetAlertService.FireAsync(new SweetAlertOptions
             {
                 Title = "Confirmación",
