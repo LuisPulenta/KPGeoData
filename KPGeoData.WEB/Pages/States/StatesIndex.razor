@@ -13,7 +13,7 @@ else
     <div class="card">
         <div class="card-header">
             <span>
-                <i class="oi oi-globe"></i> Estados
+                <i class="oi oi-task"></i> Estados
                 <a class="btn btn-sm btn-primary float-end" @onclick=@(() => ShowModal())><i class="oi oi-plus"></i> Nuevo Estado</a>
             </span>
         </div>
@@ -38,7 +38,6 @@ else
                         <thead>
                             <tr>
                                 <th>Evento</th>
-                                <th>Activo</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -49,10 +48,6 @@ else
                                     <td>
                                         @state.Name
                                     </td>
-                                    <td>
-                                        @state.Active
-                                    </td>
-
                                     <td>
                                         <a @onclick=@(() => ShowModal(state.Id, true)) class="btn btn-warning btn-sm"><i class="oi oi-pencil" /> Editar</a>
                                         <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(state.Id))>Borrar</button>

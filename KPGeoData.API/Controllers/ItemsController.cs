@@ -64,6 +64,7 @@ namespace KPGeoData.API.Controllers
         public async Task<ActionResult> Get(int id)
         {
             var item = await _context.Items
+                .Include(x => x.ItemPhotos)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (item is null)
             {

@@ -13,7 +13,7 @@ else
     <div class="card">
         <div class="card-header">
             <span>
-                <i class="oi oi-globe"></i> @company.Name
+                <i class="oi oi-calculator"></i> @company!.Name
                 <a class="btn btn-sm btn-primary float-end" href="/surveys/create/@company.Id"><i class="oi oi-plus"></i> Nuevo Relevamiento</a>
             </span>
         </div>
@@ -133,14 +133,11 @@ else
             url2 = $"/api/surveys/surveysbycompany/totalPages?&filter={Filter}/{company!.Id}"; 
         }
 
-
-        //var responseHppt = await repository.Get<Company>($"/api/companies/{Id}");
         var responseHppt2 = await repository.Get<List<Survey>>(url1);
         var responseHppt3 = await repository.Get<int>(url2);
-        //company = responseHppt.Response;
+        
         surveys = responseHppt2.Response;
         totalPages = responseHppt3.Response;
-        var a = 1;
     }
 
     private async Task DeleteAsync(int id)

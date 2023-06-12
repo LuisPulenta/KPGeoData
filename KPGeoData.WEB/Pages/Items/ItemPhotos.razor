@@ -1,0 +1,102 @@
+﻿@page "/items/photos/{ItemId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin, UserWeb")]
+
+@if (item is null)
+{
+     <div class="spinner"/>
+}
+else
+{
+     <div class="card">
+
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> Fotos
+                <button class="btn btn-success btn-sm float-end mx-2" @onclick="Return"><i class="oi oi-arrow-thick-left"></i> Regresar</button>
+            </span>
+        </div>
+
+        <div class="card-body">
+
+            @if (item.ItemPhotos is not null)
+            {
+                <CarouselView Images="itemDTO.ItemImages" />
+            }
+                       
+        </div>
+    </div>
+}
+
+@code {
+    private ItemDTO itemDTO = new ItemDTO
+        {
+            ItemImages = new List<string>()
+        };
+
+    private bool loading = true;
+    private Item? item;
+        
+    [Parameter]
+    public int ItemId { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadItemAsync();
+    }
+    
+    private async Task AddImageAsync()
+    {
+    }
+
+    private async Task RemoveImageAsync()
+    {
+    }
+
+    private async Task LoadItemAsync()
+    {
+        loading = true;
+        var httpResponse = await repository.Get<Item>($"/api/items/{ItemId}");
+
+        if (httpResponse.Error)
+        {
+            loading = false;
+            var message = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        item = httpResponse.Response!;
+        itemDTO = ToItemDTO(item);
+        loading = false;
+    }
+
+    private ItemDTO ToItemDTO(Item item)
+    {
+        return new ItemDTO
+            {
+                Name = item.Name,
+                Active = item.Active,
+                Address = item.Address,
+                Country= item.Country,
+                Date = item.Date,
+                Id = item.Id,
+                ItemType = item.ItemType,
+                Latitude = item.Latitude,
+                Locality = item.Locality,
+                Longitude = item.Longitude,
+                Remarks= item.Remarks,
+                State = item.State,
+                SurveyId = item.SurveyId,
+                ItemImages = item.ItemPhotos!.Select(x => x.PhotoFullPath).ToList()
+            };
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo($"/surveys/details/{item!.SurveyId}");
+    }
+}

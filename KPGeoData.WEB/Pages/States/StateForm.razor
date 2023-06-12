@@ -8,7 +8,7 @@
 
         <div class="card-header">
             <span>
-                <i class="oi oi-person" /> @Titulo
+                <i class="oi oi-task" /> @Titulo
                 <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Guardar Cambios</button>
                 <button class="btn btn-success btn-sm float-end mx-2" @onclick="ReturnAction"><i class="oi oi-arrow-thick-left"></i> Regresar</button>
             </span>
@@ -23,12 +23,6 @@
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label>Activo:</label>
-                <div>
-                    <input type="checkbox" @bind="@State.Active">
-                </div>
-            </div>
         </div>
 
     </div>

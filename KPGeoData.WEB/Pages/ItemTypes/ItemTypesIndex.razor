@@ -14,7 +14,7 @@ else
     <div class="card">
         <div class="card-header">
             <span>
-                <i class="oi oi-globe"></i> Items
+                <i class="oi oi-spreadsheet"></i> Items
                 <a class="btn btn-sm btn-primary float-end" @onclick=@(() => ShowModal())><i class="oi oi-plus"></i> Nuevo Item</a>
             </span>
         </div>
@@ -39,7 +39,6 @@ else
                         <thead>
                             <tr>
                                 <th>Evento</th>
-                                <th>Activo</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -50,10 +49,6 @@ else
                                     <td>
                                         @itemType.Name
                                     </td>
-                                    <td>
-                                        @itemType.Active
-                                    </td>
-
                                     <td>
                                         <a @onclick=@(() => ShowModal(itemType.Id, true)) class="btn btn-warning btn-sm"><i class="oi oi-pencil" /> Editar</a>
                                         <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(itemType.Id))>Borrar</button>

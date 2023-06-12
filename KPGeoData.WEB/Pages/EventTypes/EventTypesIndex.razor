@@ -14,7 +14,7 @@ else
     <div class="card">
         <div class="card-header">
             <span>
-                <i class="oi oi-globe"></i> Eventos
+                <i class="oi oi-sort-ascending"></i> Eventos
                 <a class="btn btn-sm btn-primary float-end" @onclick=@(() => ShowModal())><i class="oi oi-plus"></i> Nuevo Evento</a>
             </span>
         </div>
@@ -39,7 +39,6 @@ else
                         <thead>
                             <tr>
                                 <th>Evento</th>
-                                <th>Activo</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -49,9 +48,6 @@ else
                                 <tr>
                                     <td>
                                         @eventType.Name
-                                    </td>
-                                    <td>
-                                        @eventType.Active
                                     </td>
 
                                     <td>

@@ -169,10 +169,10 @@ namespace KPGeoData.API.Data
         {
             if (!_context.ItemTypes.Any())
             {
-                _context.ItemTypes.Add(new ItemType { Name = "Poste madera", Active = true });
-                _context.ItemTypes.Add(new ItemType { Name = "Poste hormigón", Active = true });
-                _context.ItemTypes.Add(new ItemType { Name = "Semáforo", Active = true });
-                _context.ItemTypes.Add(new ItemType { Name = "Luminaria", Active = true });
+                _context.ItemTypes.Add(new ItemType { Name = "Poste madera" });
+                _context.ItemTypes.Add(new ItemType { Name = "Poste hormigón"});
+                _context.ItemTypes.Add(new ItemType { Name = "Semáforo" });
+                _context.ItemTypes.Add(new ItemType { Name = "Luminaria" });
                 ;
             }
             await _context.SaveChangesAsync();
@@ -182,10 +182,10 @@ namespace KPGeoData.API.Data
         {
             if (!_context.States.Any())
             {
-                _context.States.Add(new State { Name = "Averiado", Active = true });
-                _context.States.Add(new State { Name = "Defectuoso", Active = true });
-                _context.States.Add(new State { Name = "Nuevo", Active = true });
-                _context.States.Add(new State { Name = "Destruído", Active = true });
+                _context.States.Add(new State { Name = "Averiado" });
+                _context.States.Add(new State { Name = "Defectuoso" });
+                _context.States.Add(new State { Name = "Nuevo" });
+                _context.States.Add(new State { Name = "Destruído" });
             }
             await _context.SaveChangesAsync();
         }
@@ -194,9 +194,9 @@ namespace KPGeoData.API.Data
         {
             if (!_context.EventTypes.Any())
             {
-                _context.EventTypes.Add(new EventType { Name = "Antes", Active = true });
-                _context.EventTypes.Add(new EventType { Name = "Después", Active = true });
-                _context.EventTypes.Add(new EventType { Name = "Relevamiento", Active = true });
+                _context.EventTypes.Add(new EventType { Name = "Antes"});
+                _context.EventTypes.Add(new EventType { Name = "Después"});
+                _context.EventTypes.Add(new EventType { Name = "Relevamiento" });
             }
             await _context.SaveChangesAsync();
         }

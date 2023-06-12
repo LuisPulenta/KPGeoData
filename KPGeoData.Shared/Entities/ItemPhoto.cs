@@ -19,7 +19,7 @@ namespace KPGeoData.Shared.Entities
         public string Remarks { get; set; } = null!;
         public string Photo { get; set; } = null!;
         public string PhotoFullPath => string.IsNullOrEmpty(Photo)
-        ? $"http://190.111.249.225/RowingAppApi/images/Obras/noimage.png"
-        : $"http://190.111.249.225/RowingAppApi{Photo[1..]}";
+        ? $"https://localhost:7217/images/Logos/noimage.png"
+        : $"https://localhost:7217{Photo[1..]}";
     }
 }
