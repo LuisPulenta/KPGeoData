@@ -4,7 +4,6 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin, UserWeb")]
 
-
 @if (loading)
 {
     <div class="spinner" />
@@ -77,7 +76,7 @@ else
     private void Return()
     {
         surveyForm!.FormPostedSuccessfully = true;
-        if (userLogged.UserType==UserType.Admin)
+        if (userLogged!.UserType==UserType.Admin)
         {
             navigationManager.NavigateTo($"/companies/details/{CompanyId}");
         }

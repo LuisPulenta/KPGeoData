@@ -1,8 +1,8 @@
 ﻿@inject SweetAlertService sweetAlertService
 
-<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
 
-<EditForm EditContext="editContext" OnValidSubmit="OnValidSubmit">
+<EditForm EditContext="editContext" OnValidSubmit="OnDataAnnotationsValidatedAsync">
     <DataAnnotationsValidator />
     <div class="card">
 
@@ -73,9 +73,11 @@
     private List<MultipleSelectorModel> selectedItems { get; set; } = new();
     private List<MultipleSelectorModel> nonSelectedItems { get; set; } = new();
 
-
     [Parameter]
+    public bool IsEdit { get; set; } = false;
+
     [EditorRequired]
+    [Parameter]
     public SurveyDTO SurveyDTO { get; set; } = null!;
 
     [Parameter]
@@ -85,8 +87,6 @@
     [Parameter]
     [EditorRequired]
     public EventCallback ReturnAction { get; set; }
-
-    public bool FormPostedSuccessfully { get; set; }
 
     [Parameter]
     public string Titulo { get; set; } = null!;
@@ -112,6 +112,7 @@
     [EditorRequired]
     public List<ItemType> NonSelectedItems { get; set; } = new();
 
+    public bool FormPostedSuccessfully { get; set; } = false;
 
     protected override void OnInitialized()
     {
@@ -122,6 +123,14 @@
         nonSelectedEvents = NonSelectedEvents.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
         selectedItems = SelectedItems.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
         nonSelectedItems = NonSelectedItems.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+    }
+
+    private async Task OnDataAnnotationsValidatedAsync()
+    {
+        SurveyDTO.StateIds = selectedStates.Select(x => int.Parse(x.Key)).ToList();
+        SurveyDTO.ItemTypeIds = selectedItems.Select(x => int.Parse(x.Key)).ToList();
+        SurveyDTO.EventTypeIds = selectedEvents.Select(x => int.Parse(x.Key)).ToList();
+        await OnValidSubmit.InvokeAsync();
     }
 
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)

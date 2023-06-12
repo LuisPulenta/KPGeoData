@@ -4,48 +4,186 @@
 @inject SweetAlertService sweetAlertService
 @attribute [Authorize(Roles = "Admin, UserWeb")]
 
-@if (survey is null)
+@if (loading)
 {
-     <div class="spinner"/>
+    <div class="spinner" />
 }
 else
 {
-    <SurveyForm @ref="surveyForm" Survey="survey" OnValidSubmit="EditAsync" ReturnAction="Return" Titulo=" Editar Relevamiento" />
+    <SurveyForm @ref="surveyForm"   SurveyDTO="surveyDTO"
+                                    SelectedStates="selectedStates" 
+                                    NonSelectedStates="nonSelectedStates" 
+                                    SelectedEvents="selectedEventTypes" 
+                                    NonSelectedEvents="nonSelectedEventTypes" 
+                                    SelectedItems="selectedItemTypes" 
+                                    NonSelectedItems="nonSelectedItemTypes" 
+                                    OnValidSubmit="EditAsync" 
+                                    ReturnAction="Return"
+                                    IsEdit=true
+                                    Titulo="Editar Relevamiento" />
 }
 
 @code {
-    private Survey? survey;
+    private SurveyDTO surveyDTO = new SurveyDTO
+        {
+            StateIds = new List<int>(),
+            EventTypeIds = new List<int>(),
+            ItemTypeIds = new List<int>()
+        };
     private SurveyForm? surveyForm;
-    private User? userLogged;
 
+    private List<State> selectedStates = new();
+    private List<State> nonSelectedStates = new();
+    private List<ItemType> selectedItemTypes = new();
+    private List<ItemType> nonSelectedItemTypes = new();
+    private List<EventType> selectedEventTypes = new();
+    private List<EventType> nonSelectedEventTypes = new();
+ 
+    private bool loading = true;
+
+    private Survey? survey;
+   
     [Parameter]
     public int SurveyId { get; set; }
+        
+    private User? userLogged;
 
     protected override async Task OnInitializedAsync()
     {
         var userResponseHppt2 = await repository.Get<User>("/api/accounts");
         userLogged = userResponseHppt2.Response!;
 
-        var responseHttp = await repository.Get<Survey>($"/api/surveys/{SurveyId}");
-        if (responseHttp.Error)
-        {
-            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
-            {
-                navigationManager.NavigateTo("/companies");
-                return;
-            }
+        await LoadSurveyAsync();
+        await LoadStatesAsync();
+        await LoadItemTypesAsync();
+        await LoadEventTypesAsync();
+    }
 
-            var message = await responseHttp.GetErrorMessage();
+    private async Task LoadSurveyAsync()
+    {
+        loading = true;
+        var httpResponse = await repository.Get<Survey>($"/api/surveys/full/{SurveyId}");
+
+        if (httpResponse.Error)
+        {
+            loading = false;
+            var message = await httpResponse.GetErrorMessage();
             await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
             return;
         }
 
-        survey = responseHttp.Response;
+        survey = httpResponse.Response!;
+        surveyDTO = ToSurveyDTO(survey);
+        loading = false;
     }
+
+    private SurveyDTO ToSurveyDTO(Survey survey)
+    {
+        return new SurveyDTO
+            {
+                Active=survey.Active,
+                CompanyId = survey.CompanyId,
+                Date = survey.Date,
+                EventTypeIds = survey.SurveyEventTypes!.Select(x=>x.SurveyId).ToList(),
+                ItemTypeIds = survey.SurveyItemTypes!.Select(x => x.SurveyId).ToList(),
+                StateIds = survey.SurveyStates!.Select(x => x.SurveyId).ToList(),
+                Id = survey.Id,
+                Name = survey.Name,
+            };
+    }
+
+    private async Task LoadStatesAsync()
+    {
+        loading = true;
+        var httpResponse = await repository.Get<List<State>>("/api/states");
+
+        if (httpResponse.Error)
+        {
+            loading = false;
+            var message = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        var states = httpResponse.Response!;
+        foreach (var state in states!)
+        {
+            var found = survey!.SurveyStates!.FirstOrDefault(x => x.State.Id == state.Id);
+            if (found == null)
+            {
+                nonSelectedStates.Add(state);
+            }
+            else
+            {
+                selectedStates.Add(state);
+            }
+        }
+        loading = false;
+    }
+
+    private async Task LoadItemTypesAsync()
+    {
+        loading = true;
+        var httpResponse = await repository.Get<List<ItemType>>("/api/itemtypes");
+
+        if (httpResponse.Error)
+        {
+            loading = false;
+            var message = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        var itemTypes = httpResponse.Response!;
+        foreach (var itemType in itemTypes!)
+        {
+            var found = survey!.SurveyItemTypes!.FirstOrDefault(x => x.ItemType.Id == itemType.Id);
+            if (found == null)
+            {
+                nonSelectedItemTypes.Add(itemType);
+            }
+            else
+            {
+                selectedItemTypes.Add(itemType);
+            }
+        }
+        loading = false;
+    }
+
+    private async Task LoadEventTypesAsync()
+    {
+        loading = true;
+        var httpResponse = await repository.Get<List<EventType>>("/api/eventtypes");
+
+        if (httpResponse.Error)
+        {
+            loading = false;
+            var message = await httpResponse.GetErrorMessage();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        var eventTypes = httpResponse.Response!;
+        foreach (var eventType in eventTypes!)
+        {
+            var found = survey!.SurveyEventTypes!.FirstOrDefault(x => x.EventType.Id == eventType.Id);
+            if (found == null)
+            {
+                nonSelectedEventTypes.Add(eventType);
+            }
+            else
+            {
+                selectedEventTypes.Add(eventType);
+            }
+        }
+        loading = false;
+    }
+
+
 
     private async Task EditAsync()
     {
-        var responseHttp = await repository.Put("/api/surveys", survey);
+        var responseHttp = await repository.Put("/api/surveys", surveyDTO);
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessage();
@@ -66,7 +204,7 @@ else
     private void Return()
     {
         surveyForm!.FormPostedSuccessfully = true;
-        if (userLogged.UserType == UserType.Admin)
+        if (userLogged!.UserType == UserType.Admin)
         {
             navigationManager.NavigateTo($"/companies/details/{survey!.CompanyId}");
         }

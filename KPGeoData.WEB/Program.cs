@@ -6,6 +6,7 @@ using KPGeoData.WEB.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor.Services;
 using Sales.WEB.Repositories;
 
 
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddSweetAlert2();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredModal();
+builder.Services.AddMudServices();
 //builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderTest>();
 
 builder.Services.AddScoped<AuthenticationProviderJWT>();

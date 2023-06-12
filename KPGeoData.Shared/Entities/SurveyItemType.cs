@@ -13,5 +13,6 @@ namespace KPGeoData.Shared.Entities
         [MaxLength(100, ErrorMessage = "El campo {0} no puede tener mas de {1} caracteres.")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public ItemType ItemType { get; set; } = null!;
+        public int ItemTypeId { get; set; }
     }
 }

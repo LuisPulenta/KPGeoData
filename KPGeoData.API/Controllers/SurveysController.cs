@@ -116,9 +116,13 @@ namespace KPGeoData.API.Controllers
         [HttpGet("full/{id:int}")]
         public async Task<ActionResult> GetFull(int id)
         {
-            var survey = await _context.Surveys!
-                .Include(x => x.Items!)
-                .ThenInclude(x => x.ItemPhotos)
+            var survey = await _context.Surveys!.Include(x => x.Items!).ThenInclude(x => x.ItemPhotos).Include(x => x.SurveyEventTypes!)
+                .Include(x => x.SurveyEventTypes!)
+                .ThenInclude(x => x.EventType)
+                .Include(x => x.SurveyItemTypes!)
+                .ThenInclude(x => x.ItemType)
+                .Include(x => x.SurveyStates!)
+                .ThenInclude(x => x.State)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (survey is null)
             {
@@ -179,13 +183,29 @@ namespace KPGeoData.API.Controllers
 
 
         [HttpPut]
-        public async Task<ActionResult> Put(Survey survey)
+        public async Task<ActionResult> Put(SurveyDTO surveyDTO)
         {
             try
             {
+                var survey = await _context.Surveys
+                .Include(x => x.SurveyStates)
+                .Include(x => x.SurveyItemTypes)
+                .Include(x => x.SurveyEventTypes)
+                .FirstOrDefaultAsync(x => x.Id == surveyDTO.Id);
+                if (survey == null)
+                {
+                    return NotFound();
+                }
+
+                survey.Name = surveyDTO.Name;
+                survey.Active = surveyDTO.Active;
+                survey.SurveyStates = surveyDTO.StateIds!.Select(x => new SurveyState { StateId = x }).ToList();
+                survey.SurveyEventTypes = surveyDTO.EventTypeIds!.Select(x => new SurveyEventType { EventTypeId = x }).ToList();
+                survey.SurveyItemTypes = surveyDTO.ItemTypeIds!.Select(x => new SurveyItemType { ItemTypeId = x }).ToList();
+
                 _context.Update(survey);
                 await _context.SaveChangesAsync();
-                return Ok(survey);
+                return Ok(surveyDTO);
             }
             catch (DbUpdateException dbUpdateException)
             {
