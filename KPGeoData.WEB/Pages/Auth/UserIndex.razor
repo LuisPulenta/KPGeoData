@@ -60,7 +60,9 @@ else
                             <td>@user.PhoneNumber</td>
                             <td>@user.Email</td>
                             <td>@user.EmailConfirmed</td>
-                            <td>@user.Active</td>
+                            <td>
+                                <input type="checkbox" onclick="return false" @bind="@user.Active">
+                            </td>
                             <td>
                                 <a href="/edituserapp/@user.Id" class="btn btn-warning btn-sm"><i class="oi oi-pencil" /> Editar</a>
                                 <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(user.Id))><i class="oi oi-trash" /> Borrar</button>

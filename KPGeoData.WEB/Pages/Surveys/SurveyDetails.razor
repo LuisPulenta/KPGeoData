@@ -20,9 +20,6 @@ else
                 }
                 else
                 {
-                    <a class="btn btn-sm btn-primary float-end mx-2" href="/surveystates/@survey.Id"><i class="oi oi-task"></i> Estados</a>
-                    <a class="btn btn-sm btn-primary float-end mx-2" href="/surveyeventtypes/@survey.Id"><i class="oi oi-sort-ascending"></i> Eventos</a>
-                    <a class="btn btn-sm btn-primary float-end mx-2" href="/surveyitemtypes/@survey.Id"><i class="oi oi-spreadsheet"></i> Items</a>
                     <a class="btn btn-sm btn-success float-end mx-2" href="/surveysbycompany"><i class="oi oi-arrow-thick-left"></i> Regresar</a>
                 }
                 
@@ -90,7 +87,8 @@ else
                                 @item.State
                             </td>
                             <td>
-                                @item.Active
+                                        <input type="checkbox" onclick="return false" @bind="@item.Active">
+
                             </td>
                             <td>
                                 @item.ItemPhotosNumber

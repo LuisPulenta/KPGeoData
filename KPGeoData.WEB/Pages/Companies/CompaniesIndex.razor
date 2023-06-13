@@ -75,11 +75,8 @@ else
                                         @company.Contact
                                     </td>
                                     <td>
-                                        @company.Active
+                                        <input type="checkbox" onclick="return false" @bind="@company.Active">
                                     </td>
-                                    @*<td>
-                            <input type="checkbox" checked= @company.Active">
-                            </td>*@
                                     <td>
                                         @company.SurveysNumber
                                     </td>

@@ -57,8 +57,9 @@ else
                                     <td>
                                         @survey.Date
                                     </td>
+
                                     <td>
-                                        @survey.Active
+                                        <input type="checkbox" onclick="return false" @bind="@survey.Active">
                                     </td>
 
                                     <td style="width:260px">
