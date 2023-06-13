@@ -22,7 +22,7 @@ else
 
         <div class="card-body">
 
-            @if (item.ItemPhotos is not null)
+            @if (itemDTO.ItemImages is not null)
             {
                 <CarouselView Images="itemDTO.ItemImages" />
             }
@@ -34,20 +34,23 @@ else
 @code {
     private ItemDTO itemDTO = new ItemDTO
         {
-            ItemImages = new List<string>()
+            ItemImages = new List<PhotoDTO>()
         };
+
+    //public List<PhotoDTO> Images { get; set; } = null!;
 
     private bool loading = true;
     private Item? item;
-        
+
+
     [Parameter]
     public int ItemId { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
         await LoadItemAsync();
-    }
-    
+        }
+
     private async Task AddImageAsync()
     {
     }
@@ -91,10 +94,18 @@ else
                 Remarks= item.Remarks,
                 State = item.State,
                 SurveyId = item.SurveyId,
-                ItemImages = item.ItemPhotos!.Select(x => x.PhotoFullPath).ToList()
+                ItemImages = item.ItemPhotos!.Select(x => new PhotoDTO { Image = x.PhotoFullPath, Remarks = x.Remarks }).ToList()
             };
     }
 
+    private PhotoDTO ToPhotoDTO(string Image, string Remarks)
+    {
+        return new PhotoDTO
+            {
+                Image = Image,
+                Remarks = Remarks,
+            };
+    }
     private void Return()
     {
         navigationManager.NavigateTo($"/surveys/details/{item!.SurveyId}");

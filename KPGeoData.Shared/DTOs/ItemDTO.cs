@@ -49,6 +49,6 @@ namespace KPGeoData.Shared.DTOs
         [Display(Name = "Activo")]
         public bool Active { get; set; }
 
-        public List<string>? ItemImages { get; set; }
+        public List<PhotoDTO>? ItemImages { get; set; }
     }
 }
