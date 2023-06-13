@@ -154,6 +154,12 @@ a, .btn-link {
     padding: 5px
 }
 
-    .multiple-selector-botones button {
+.multiple-selector-botones button {
         margin: 5px;
-    }
+}
+
+.contenedor {
+    display: flex;
+    justify-content: center;
+}
+
