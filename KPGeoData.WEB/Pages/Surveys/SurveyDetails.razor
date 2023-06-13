@@ -46,16 +46,16 @@ else
                 <thead>
                     <tr>
                         <th style="width:220px">Item</th>
-                    <th style="width:220px">Tipo</th>
+                        <th style="width:220px">Tipo</th>
                         <th style="width:220px">Dirección</th>
-                    <th style="width:220px">Localidad</th>
+                        <th style="width:220px">Localidad</th>
                         <th style="width:220px">País</th>
-                    <th style="width:220px">Latitud</th>
-                        <th style="width:220px">Longitud</th>
-                    <th style="width:220px">Estado</th>
-                        <th style="width:220px">Activo</th>
-                    <th style="width:220px">Fotos</th>
-                        <th style="width:220px"></th>
+                        <th style="width:180px">Latitud</th>
+                        <th style="width:180px">Longitud</th>
+                        <th style="width:220px">Estado</th>
+                        <th style="width:160px">Activo</th>
+                        <th style="width:160px">Fotos</th>
+                        <th style="width:360px"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,9 +94,9 @@ else
                                 @item.ItemPhotosNumber
                             </td>
                             <td style="width:260px">
-                                        <a href="/items/photos/@item.Id" class="btn btn-info btn-sm"><i class="oi oi-camera-slr" /> Fotos</a>
-                                        <a href="/items/edit/@item.Id" class="btn btn-warning btn-sm"><i class="oi oi-pencil" /> Editar</a>
-                                        <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(item.Id))><i class="oi oi-trash" /> Borrar</button>
+                                        <a href="/items/photos/@item.Id" class="btn btn-info btn-sm"><i class="oi oi-camera-slr" /></a>
+                                        <a href="/items/edit/@item.Id" class="btn btn-warning btn-sm"><i class="oi oi-pencil" /></a>
+                                        <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(item.Id))><i class="oi oi-trash" /></button>
                             </td>
                         </tr>
                     }
