@@ -32,6 +32,7 @@ namespace KPGeoData.API.Controllers
             _mailHelper = mailHelper;
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPost("CreateUser")]
         public async Task<ActionResult> CreateUser([FromBody] UserDTO model)
         {
@@ -63,6 +64,7 @@ namespace KPGeoData.API.Controllers
             return BadRequest(result.Errors.FirstOrDefault());
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPost("Login")]
         public async Task<ActionResult> Login([FromBody] LoginDTO model)
         {
@@ -123,6 +125,7 @@ namespace KPGeoData.API.Controllers
             };
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> Put(User user)
@@ -156,6 +159,7 @@ namespace KPGeoData.API.Controllers
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> Get()
@@ -163,6 +167,7 @@ namespace KPGeoData.API.Controllers
             return Ok(await _userHelper.GetUserAsync(User.Identity!.Name!));
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPost("changePassword")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> ChangePasswordAsync(ChangePasswordDTO model)
@@ -186,6 +191,7 @@ namespace KPGeoData.API.Controllers
             return NoContent();
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpGet("ConfirmEmail")]
         public async Task<ActionResult> ConfirmEmailAsync(string userId, string token)
         {
@@ -204,6 +210,7 @@ namespace KPGeoData.API.Controllers
             return NoContent();
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPost("ResendToken")]
         public async Task<ActionResult> ResendToken([FromBody] EmailDTO model)
         {
@@ -234,6 +241,7 @@ namespace KPGeoData.API.Controllers
             return BadRequest(response.Message);
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPost("RecoverPassword")]
         public async Task<ActionResult> RecoverPassword([FromBody] EmailDTO model)
         {
@@ -264,6 +272,7 @@ namespace KPGeoData.API.Controllers
             return BadRequest(response.Message);
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpPost("ResetPassword")]
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
@@ -282,6 +291,7 @@ namespace KPGeoData.API.Controllers
             return BadRequest(result.Errors.FirstOrDefault()!.Description);
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpGet("all")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> GetAll([FromQuery] PaginationDTO pagination)
@@ -311,6 +321,7 @@ namespace KPGeoData.API.Controllers
                 .ToListAsync());
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpGet("totalPages")]
         public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
         {
@@ -327,7 +338,7 @@ namespace KPGeoData.API.Controllers
             return Ok(totalPages);
         }
 
-
+        //-------------------------------------------------------------------------------------------------
         [HttpGet("allApp/{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> GetAllApp([FromQuery] PaginationDTO pagination,int id)
@@ -356,6 +367,7 @@ namespace KPGeoData.API.Controllers
                 .ToListAsync());
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpGet("totalPages/{id:int}")]
         public async Task<ActionResult> GetPagesAll([FromQuery] PaginationDTO pagination, int id)
         {
@@ -374,6 +386,7 @@ namespace KPGeoData.API.Controllers
             return Ok(totalPages);
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpGet]
         [Route("/api/accounts/GetUserById/{id}")]
         public async Task<User> GetUserById(string Id)
@@ -382,6 +395,7 @@ namespace KPGeoData.API.Controllers
             return user!;
         }
 
+        //-------------------------------------------------------------------------------------------------
         [HttpDelete("{Id}")]
         public async Task<IActionResult> DeleteAsync(string id)
         {
